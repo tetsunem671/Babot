@@ -56,7 +56,7 @@ btn1.MouseButton1Click:Connect(function()
     enabled = not enabled
 
     btn2.BackgroundColor3 = Color3.fromRGB(80,80,80)
-    btn1.BackgroundColor3 = enabled and Color3.fromRGB(80,80,80) or Color3.fromRGB(0,170,0)
+    btn1.BackgroundColor3 = enabled and Color3.fromRGB(0,170,0) or Color3.fromRGB(80,80,80)
 end)
 
 btn2.MouseButton1Click:Connect(function()
@@ -64,7 +64,7 @@ btn2.MouseButton1Click:Connect(function()
     enabled = not enabled
 
     btn1.BackgroundColor3 = Color3.fromRGB(80,80,80)
-    btn2.BackgroundColor3 = enabled and Color3.fromRGB(80,80,80) or Color3.fromRGB(0,170,0)
+    btn1.BackgroundColor3 = enabled and Color3.fromRGB(0,170,0) or Color3.fromRGB(80,80,80)
 end)
 
 --// MAIN LOOP
