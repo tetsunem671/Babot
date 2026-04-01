@@ -66,6 +66,11 @@ task.spawn(function()
 
         local breakables = BreakablesClass.GetNearby(hrp.Position, 100)
 
+        -- 🔥 SORT BY DISTANCE (nearest first)
+        table.sort(breakables, function(a, b)
+            return (a.position - hrp.Position).Magnitude < (b.position - hrp.Position).Magnitude
+        end)
+
         for _, obj in ipairs(breakables) do
             if not enabled then break end
 
