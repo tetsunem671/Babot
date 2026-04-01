@@ -2,35 +2,34 @@ local TweenService = game:GetService("TweenService")
 local BreakablesClass = require(game:GetService("ReplicatedStorage").Shared.Classes.BreakablesClass)
 local player = game.Players.LocalPlayer
 
+--// POSITIONS (EDIT THESE)
+local pos1 = Vector3.new(0, 0, 0) -- 🔥 change this
+local pos2 = Vector3.new(50, 0, 50) -- 🔥 change this
+
 --// STATE
+local selectedPos = nil
 local enabled = false
 
 --// GUI
 local gui = Instance.new("ScreenGui")
-gui.Name = "AutoBreakGUI"
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
-local button = Instance.new("TextButton")
-button.Size = UDim2.new(0, 150, 0, 50)
-button.Position = UDim2.new(0, 20, 0, 200)
-button.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-button.TextColor3 = Color3.new(1,1,1)
-button.Text = "Auto: OFF"
-button.Parent = gui
+local btn1 = Instance.new("TextButton")
+btn1.Size = UDim2.new(0, 150, 0, 50)
+btn1.Position = UDim2.new(0, 20, 0, 200)
+btn1.Text = "Position 1"
+btn1.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+btn1.TextColor3 = Color3.new(1,1,1)
+btn1.Parent = gui
 
---// TOGGLE
-button.MouseButton1Click:Connect(function()
-    enabled = not enabled
-
-    if enabled then
-        button.Text = "Auto: ON"
-        button.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-    else
-        button.Text = "Auto: OFF"
-        button.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-    end
-end)
+local btn2 = Instance.new("TextButton")
+btn2.Size = UDim2.new(0, 150, 0, 50)
+btn2.Position = UDim2.new(0, 20, 0, 260)
+btn2.Text = "Position 2"
+btn2.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+btn2.TextColor3 = Color3.new(1,1,1)
+btn2.Parent = gui
 
 --// TWEEN FUNCTION
 local function tweenTo(position)
@@ -51,12 +50,29 @@ local function tweenTo(position)
     tween.Completed:Wait()
 end
 
+--// BUTTON LOGIC
+btn1.MouseButton1Click:Connect(function()
+    selectedPos = pos1
+    enabled = true
+
+    btn1.BackgroundColor3 = Color3.fromRGB(0,170,0)
+    btn2.BackgroundColor3 = Color3.fromRGB(80,80,80)
+end)
+
+btn2.MouseButton1Click:Connect(function()
+    selectedPos = pos2
+    enabled = true
+
+    btn2.BackgroundColor3 = Color3.fromRGB(0,170,0)
+    btn1.BackgroundColor3 = Color3.fromRGB(80,80,80)
+end)
+
 --// MAIN LOOP
 task.spawn(function()
     while true do
         task.wait(0.2)
 
-        if not enabled then continue end
+        if not enabled or not selectedPos then continue end
 
         local char = player.Character
         if not char then continue end
@@ -64,9 +80,14 @@ task.spawn(function()
         local hrp = char:FindFirstChild("HumanoidRootPart")
         if not hrp then continue end
 
+        -- 🔥 ALWAYS GO BACK TO SELECTED POSITION
+        if (hrp.Position - selectedPos).Magnitude > 100 then
+            tweenTo(selectedPos)
+        end
+
         local breakables = BreakablesClass.GetNearby(hrp.Position, 100)
 
-        -- 🔥 SORT BY DISTANCE (nearest first)
+        -- SORT NEAREST
         table.sort(breakables, function(a, b)
             return (a.position - hrp.Position).Magnitude < (b.position - hrp.Position).Magnitude
         end)
