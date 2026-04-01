@@ -61,27 +61,19 @@ end)
 --// TWEEN (NON-BLOCKING)
 local currentTween
 
-local function tweenTo(position)
+local humanoid
+
+local function getHumanoid()
     local char = player.Character
     if not char then return end
+    return char:FindFirstChildOfClass("Humanoid")
+end
 
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
+local function walkTo(position)
+    humanoid = getHumanoid()
+    if not humanoid then return end
 
-    if currentTween then
-        currentTween:Cancel()
-    end
-
-    local distance = (hrp.Position - position).Magnitude
-    local speed = 20 -- 🔥 faster
-
-    currentTween = TweenService:Create(
-        hrp,
-        TweenInfo.new(distance / speed, Enum.EasingStyle.Linear),
-        {CFrame = CFrame.new(position + Vector3.new(0, 3, 0))}
-    )
-
-    currentTween:Play()
+    humanoid:MoveTo(position)
 end
 
 --// GET NEAREST BREAKABLE
@@ -100,10 +92,12 @@ local function getNearestBreakable(hrp)
     end
 end
 
---// MAIN LOOP
 task.spawn(function()
+    local ATTACK_RANGE = 8
+    local currentTarget = nil
+
     while true do
-        task.wait(0.2)
+        task.wait(0.1)
 
         if not enabled or not selectedPos then continue end
 
@@ -111,61 +105,34 @@ task.spawn(function()
         if not char then continue end
 
         local hrp = char:FindFirstChild("HumanoidRootPart")
-        if not hrp then continue end
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if not hrp or not humanoid then continue end
 
-        -- Always return to farming zone
+        -- 🔥 stay inside farm zone
         if (hrp.Position - selectedPos).Magnitude > 120 then
-            tweenTo(selectedPos)
-            task.wait(0.5)
+            walkTo(selectedPos)
+            continue
         end
 
         local target = getNearestBreakable(hrp)
 
-        local ATTACK_RANGE = 8
-    
         if target then
-            local char = player.Character
-            local hrp = char and char:FindFirstChild("HumanoidRootPart")
-        
-            if hrp then
-                local dist = (hrp.Position - target.position).Magnitude
-        
-                -- 🔥 only move if OUTSIDE attack range
-                if dist > ATTACK_RANGE then
-                    tweenTo(target.position)
-                end
-        
-                local hitCount = 0
-                local startTime = tick()
-        
-                while enabled and target and not target.isBroken and not target.isDestroyed and target.hp > 0 do
-                    local currentDist = (hrp.Position - target.position).Magnitude
-        
-                    -- 🔥 hit as soon as in range
-                    if currentDist <= ATTACK_RANGE then
-                        --target:Hit()
-                        hitCount += 1
-                    end
-        
-                    -- 🔥 keep moving while hitting
-                    task.wait(0.04)
-        
-                    -- safety
-                    if hitCount > 35 then break end
-                    if tick() - startTime > 3 then break end
-                end
-        
-                if currentTween then
-                    currentTween:Cancel()
-                end
-        
+            local dist = (hrp.Position - target.position).Magnitude
+
+            -- 🔥 only move if not in range
+            if dist > ATTACK_RANGE then
+                walkTo(target.position)
+            else
+                -- 🔥 small micro-adjust to keep moving (prevents idle)
+                humanoid:Move(Vector3.new(
+                    math.random(-1,1),
+                    0,
+                    math.random(-1,1)
+                ), false)
             end
-            
-            task.wait(0.08)
+
         else
-            -- 🔥 nothing found → reset position to refresh spawn
-            tweenTo(selectedPos)
-            task.wait(1)
+            walkTo(selectedPos)
         end
     end
 end)
