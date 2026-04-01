@@ -7,7 +7,7 @@ local pos1 = Vector3.new(203.75982666015625, 398.7754211425781, 138.817993164062
 local pos2 = Vector3.new(-2199.806884765625, 719.1761474609375, 2377.031005859375) -- 🔥 change this
 
 --// STATE
-local config = getenv().CONFIG
+local config = getenv().CONFIG or {}
 local selectedPos = config.Default and pos1 or nil
 local enabled = config.Default and true or false
 
