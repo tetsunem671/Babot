@@ -128,7 +128,7 @@ task.spawn(function()
                 hitCount += 1
 
                 -- 🔥 Anti-spawn-break protection
-                task.wait(0.08)
+                task.wait(0.01)
 
                 -- stop overhitting (IMPORTANT)
                 if hitCount > 25 then break end
@@ -136,7 +136,7 @@ task.spawn(function()
             until target.isBroken or target.isDestroyed or target.hp <= 0
 
             -- 🔥 give time for respawn system
-            task.wait(0.3)
+            task.wait(0.1)
 
         else
             -- 🔥 nothing found → reset position to refresh spawn
