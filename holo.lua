@@ -67,7 +67,7 @@ local function tweenTo(position)
     if not hrp then return end
 
     local distance = (hrp.Position - position).Magnitude
-    local speed = 18
+    local speed = 60
 
     local tween = TweenService:Create(
         hrp,
@@ -128,7 +128,7 @@ task.spawn(function()
                 hitCount += 1
 
                 -- 🔥 Anti-spawn-break protection
-                task.wait(0.15)
+                task.wait(0.08)
 
                 -- stop overhitting (IMPORTANT)
                 if hitCount > 25 then break end
