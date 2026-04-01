@@ -132,7 +132,7 @@ task.spawn(function()
                 hitCount += 1
         
                 -- 🔥 faster hitting while moving
-                task.wait(0.05)
+                task.wait(0.1)
         
                 -- safety limits (anti bug / anti spawn break)
                 if hitCount > 30 then break end
