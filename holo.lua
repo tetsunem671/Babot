@@ -2,37 +2,63 @@ local TweenService = game:GetService("TweenService")
 local BreakablesClass = require(game:GetService("ReplicatedStorage").Shared.Classes.BreakablesClass)
 local player = game.Players.LocalPlayer
 
---// POSITIONS (EDIT THESE)
-local pos1 = Vector3.new(203.75982666015625, 398.7754211425781, 138.8179931640625) -- 🔥 change this
-local pos2 = Vector3.new(-2199.806884765625, 719.1761474609375, 2377.031005859375) -- 🔥 change this
+--// POSITIONS
+local pos1 = Vector3.new(203.75, 398.77, 138.81)
+local pos2 = Vector3.new(-2199.80, 719.17, 2377.03)
 
 --// STATE
-local config = getgenv().CONFIG or {}
-local selectedPos = config.Default and pos1 or nil
-local enabled = config.Default and true or false
+local selectedPos = nil
+local enabled = false
 
 --// GUI
 local gui = Instance.new("ScreenGui")
+gui.Name = "AutoBreakGUI"
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
-local btn1 = Instance.new("TextButton")
-btn1.Size = UDim2.new(0, 150, 0, 50)
-btn1.Position = UDim2.new(0, 20, 0, 200)
-btn1.Text = "Position 1"
-btn1.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-btn1.TextColor3 = Color3.new(1,1,1)
-btn1.Parent = gui
+local function createButton(text, y)
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(0, 150, 0, 50)
+    b.Position = UDim2.new(0, 20, 0, y)
+    b.Text = text
+    b.BackgroundColor3 = Color3.fromRGB(80,80,80)
+    b.TextColor3 = Color3.new(1,1,1)
+    b.Parent = gui
+    return b
+end
 
-local btn2 = Instance.new("TextButton")
-btn2.Size = UDim2.new(0, 150, 0, 50)
-btn2.Position = UDim2.new(0, 20, 0, 260)
-btn2.Text = "Position 2"
-btn2.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-btn2.TextColor3 = Color3.new(1,1,1)
-btn2.Parent = gui
+local btn1 = createButton("Position 1", 200)
+local btn2 = createButton("Position 2", 260)
 
---// TWEEN FUNCTION
+--// BUTTON LOGIC
+btn1.MouseButton1Click:Connect(function()
+    selectedPos = pos1
+    enabled = true
+
+    btn1.BackgroundColor3 = Color3.fromRGB(0,170,0)
+    btn2.BackgroundColor3 = Color3.fromRGB(80,80,80)
+end)
+
+btn2.MouseButton1Click:Connect(function()
+    selectedPos = pos2
+    enabled = true
+
+    btn2.BackgroundColor3 = Color3.fromRGB(0,170,0)
+    btn1.BackgroundColor3 = Color3.fromRGB(80,80,80)
+end)
+
+--// STOP (optional: press again to stop)
+local UIS = game:GetService("UserInputService")
+UIS.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if input.KeyCode == Enum.KeyCode.P then
+        enabled = false
+        btn1.BackgroundColor3 = Color3.fromRGB(80,80,80)
+        btn2.BackgroundColor3 = Color3.fromRGB(80,80,80)
+    end
+end)
+
+--// TWEEN
 local function tweenTo(position)
     local char = player.Character
     if not char then return end
@@ -43,30 +69,31 @@ local function tweenTo(position)
     local distance = (hrp.Position - position).Magnitude
     local speed = 18
 
-    local tween = TweenService:Create(hrp, TweenInfo.new(distance / speed, Enum.EasingStyle.Linear), {
-        CFrame = CFrame.new(position + Vector3.new(0, 3, 0))
-    })
+    local tween = TweenService:Create(
+        hrp,
+        TweenInfo.new(distance / speed, Enum.EasingStyle.Linear),
+        {CFrame = CFrame.new(position + Vector3.new(0, 3, 0))}
+    )
 
     tween:Play()
     tween.Completed:Wait()
 end
 
---// BUTTON LOGIC
-btn1.MouseButton1Click:Connect(function()
-    selectedPos = pos1
-    enabled = not enabled
+--// GET NEAREST BREAKABLE
+local function getNearestBreakable(hrp)
+    local breakables = BreakablesClass.GetNearby(hrp.Position, 100)
 
-    btn2.BackgroundColor3 = Color3.fromRGB(80,80,80)
-    btn1.BackgroundColor3 = enabled and Color3.fromRGB(0,170,0) or Color3.fromRGB(80,80,80)
-end)
+    table.sort(breakables, function(a, b)
+        return (a.position - hrp.Position).Magnitude <
+               (b.position - hrp.Position).Magnitude
+    end)
 
-btn2.MouseButton1Click:Connect(function()
-    selectedPos = pos2
-    enabled = not enabled
-
-    btn1.BackgroundColor3 = Color3.fromRGB(80,80,80)
-    btn1.BackgroundColor3 = enabled and Color3.fromRGB(0,170,0) or Color3.fromRGB(80,80,80)
-end)
+    for _, obj in ipairs(breakables) do
+        if obj and not obj.isBroken and not obj.isDestroyed and obj.hp > 0 then
+            return obj
+        end
+    end
+end
 
 --// MAIN LOOP
 task.spawn(function()
@@ -81,31 +108,40 @@ task.spawn(function()
         local hrp = char:FindFirstChild("HumanoidRootPart")
         if not hrp then continue end
 
-        -- 🔥 ALWAYS GO BACK TO SELECTED POSITION
-        if (hrp.Position - selectedPos).Magnitude > 100 then
+        -- Always return to farming zone
+        if (hrp.Position - selectedPos).Magnitude > 120 then
             tweenTo(selectedPos)
+            task.wait(0.5)
         end
 
-        local breakables = BreakablesClass.GetNearby(hrp.Position, 100)
+        local target = getNearestBreakable(hrp)
 
-        -- SORT NEAREST
-        table.sort(breakables, function(a, b)
-            return (a.position - hrp.Position).Magnitude < (b.position - hrp.Position).Magnitude
-        end)
+        if target then
+            tweenTo(target.position)
 
-        for _, obj in ipairs(breakables) do
-            if not enabled then break end
+            local hitCount = 0
 
-            if obj and not obj.isBroken and not obj.isDestroyed then
-                
-                tweenTo(obj.position)
+            repeat
+                if not enabled then break end
 
-                repeat
-                    if not enabled then break end
-                    obj:Hit()
-                    task.wait(0.1)
-                until obj.isBroken or obj.isDestroyed or obj.hp <= 0
-            end
+                target:Hit()
+                hitCount += 1
+
+                -- 🔥 Anti-spawn-break protection
+                task.wait(0.15)
+
+                -- stop overhitting (IMPORTANT)
+                if hitCount > 25 then break end
+
+            until target.isBroken or target.isDestroyed or target.hp <= 0
+
+            -- 🔥 give time for respawn system
+            task.wait(0.3)
+
+        else
+            -- 🔥 nothing found → reset position to refresh spawn
+            tweenTo(selectedPos)
+            task.wait(1)
         end
     end
 end)
