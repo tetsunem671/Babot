@@ -94,6 +94,24 @@ local function getHumanoid()
     return char:FindFirstChildOfClass("Humanoid")
 end
 
+local function tweenTo(position)
+    local char = player.Character
+    if not char then return end
+
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    local distance = (hrp.Position - position).Magnitude
+    local speed = 50
+
+    local tween = TweenService:Create(hrp, TweenInfo.new(distance / speed, Enum.EasingStyle.Linear), {
+        CFrame = CFrame.new(position + Vector3.new(0, 3, 0))
+    })
+
+    tween:Play()
+    tween.Completed:Wait()
+end
+
 local function walkTo(position)
     humanoid = getHumanoid()
     if not humanoid then return end
@@ -135,7 +153,7 @@ task.spawn(function()
 
         -- 🔥 stay inside farm zone
         if (hrp.Position - selectedPos).Magnitude > 120 then
-            walkTo(selectedPos)
+            tweenTo(selectedPos)
             continue
         end
 
