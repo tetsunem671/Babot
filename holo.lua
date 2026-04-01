@@ -121,31 +121,47 @@ task.spawn(function()
 
         local target = getNearestBreakable(hrp)
 
+        local ATTACK_RANGE = 8
+    
         if target then
-            tweenTo(target.position)
+            local char = player.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
         
-            local hitCount = 0
-            local startTime = tick()
+            if hrp then
+                local dist = (hrp.Position - target.position).Magnitude
         
-            while enabled and target and not target.isBroken and not target.isDestroyed and target.hp > 0 do
-                target:Hit()
-                hitCount += 1
+                -- 🔥 only move if OUTSIDE attack range
+                if dist > ATTACK_RANGE then
+                    tweenTo(target.position)
+                end
         
-                -- 🔥 faster hitting while moving
-                task.wait(0.1)
+                local hitCount = 0
+                local startTime = tick()
         
-                -- safety limits (anti bug / anti spawn break)
-                if hitCount > 30 then break end
-                if tick() - startTime > 3 then break end
+                while enabled and target and not target.isBroken and not target.isDestroyed and target.hp > 0 do
+                    local currentDist = (hrp.Position - target.position).Magnitude
+        
+                    -- 🔥 hit as soon as in range
+                    if currentDist <= ATTACK_RANGE then
+                        target:Hit()
+                        hitCount += 1
+                    end
+        
+                    -- 🔥 keep moving while hitting
+                    task.wait(0.04)
+        
+                    -- safety
+                    if hitCount > 35 then break end
+                    if tick() - startTime > 3 then break end
+                end
+        
+                if currentTween then
+                    currentTween:Cancel()
+                end
+        
             end
-        
-            -- stop movement after done
-            if currentTween then
-                currentTween:Cancel()
-            end
-        
-            task.wait(0.1)
-
+            
+            task.wait(0.08)
         else
             -- 🔥 nothing found → reset position to refresh spawn
             tweenTo(selectedPos)
