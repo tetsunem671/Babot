@@ -40,7 +40,7 @@ local function tweenTo(position)
     if not hrp then return end
 
     local distance = (hrp.Position - position).Magnitude
-    local speed = 15
+    local speed = 18
 
     local tween = TweenService:Create(hrp, TweenInfo.new(distance / speed, Enum.EasingStyle.Linear), {
         CFrame = CFrame.new(position + Vector3.new(0, 3, 0))
