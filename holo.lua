@@ -128,7 +128,7 @@ task.spawn(function()
                 hitCount += 1
 
                 -- 🔥 Anti-spawn-break protection
-                task.wait(0.01)
+                task.wait(0.1)
 
                 -- stop overhitting (IMPORTANT)
                 if hitCount > 25 then break end
