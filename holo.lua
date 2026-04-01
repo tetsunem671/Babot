@@ -53,18 +53,18 @@ end
 --// BUTTON LOGIC
 btn1.MouseButton1Click:Connect(function()
     selectedPos = pos1
-    enabled = true
+    enabled = not enabled
 
-    btn1.BackgroundColor3 = Color3.fromRGB(0,170,0)
     btn2.BackgroundColor3 = Color3.fromRGB(80,80,80)
+    btn1.BackgroundColor3 = enabled and Color3.fromRGB(80,80,80) or Color3.fromRGB(0,170,0)
 end)
 
 btn2.MouseButton1Click:Connect(function()
     selectedPos = pos2
-    enabled = true
+    enabled = not enabled
 
-    btn2.BackgroundColor3 = Color3.fromRGB(0,170,0)
     btn1.BackgroundColor3 = Color3.fromRGB(80,80,80)
+    btn2.BackgroundColor3 = enabled and Color3.fromRGB(80,80,80) or Color3.fromRGB(0,170,0)
 end)
 
 --// MAIN LOOP
