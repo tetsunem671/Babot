@@ -1,6 +1,5 @@
 local TweenService = game:GetService("TweenService")
 local TeleportService = game:GetService("TeleportService")
-local HttpService = game:GetService("HttpService")
 local BreakablesClass = require(game:GetService("ReplicatedStorage").Shared.Classes.BreakablesClass)
 local player = game.Players.LocalPlayer
 
@@ -12,6 +11,8 @@ local pos2 = Vector3.new(-2199.80, 719.17, 2377.03)
 local config = getgenv().CONFIG or {} 
 local selectedPos = config.Default and pos1 or nil 
 local enabled = config.Default and true or false
+
+local privateServerCode = config.PrivateServerCode
 
 local serverhop = config.Serverhop or {}
 local hopEnabled = serverhop.Enabled or false
@@ -69,36 +70,16 @@ UIS.InputBegan:Connect(function(input, gpe)
 end)
 
 local function serverHop()
-    local servers = {}
-    local cursor = ""
+    local code = privateServerCode or nil
 
-    repeat
-        local url = "https://games.roblox.com/v1/games/"..PLACE_ID.."/servers/Public?sortOrder=Asc&limit=100"
-        if cursor ~= "" then
-            url = url .. "&cursor=" .. cursor
-        end
-
-        local success, result = pcall(function()
-            return HttpService:JSONDecode(game:HttpGet(url))
-        end)
-
-        if success and result and result.data then
-            for _, server in ipairs(result.data) do
-                if server.playing < server.maxPlayers and server.id ~= game.JobId then
-                    table.insert(servers, server.id)
-                end
-            end
-            cursor = result.nextPageCursor or ""
-        else
-            break
-        end
-
-        task.wait(0.2)
-    until cursor == ""
-
-    if #servers > 0 then
-        local randomServer = servers[math.random(1, #servers)]
-        TeleportService:TeleportToPlaceInstance(PLACE_ID, randomServer, player)
+    if not code then
+        TeleportService:TeleportToPlaceInstance(
+            game.PlaceId,
+            game.JobId,
+            Players.LocalPlayer
+        )
+    else
+        TeleportService:TeleportToPrivateServer(game.PlaceId, code, {player})
     end
 end
 
