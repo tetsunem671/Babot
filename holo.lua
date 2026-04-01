@@ -58,7 +58,9 @@ UIS.InputBegan:Connect(function(input, gpe)
     end
 end)
 
---// TWEEN
+--// TWEEN (NON-BLOCKING)
+local currentTween
+
 local function tweenTo(position)
     local char = player.Character
     if not char then return end
@@ -66,17 +68,20 @@ local function tweenTo(position)
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
-    local distance = (hrp.Position - position).Magnitude
-    local speed = 60
+    if currentTween then
+        currentTween:Cancel()
+    end
 
-    local tween = TweenService:Create(
+    local distance = (hrp.Position - position).Magnitude
+    local speed = 80 -- 🔥 faster
+
+    currentTween = TweenService:Create(
         hrp,
         TweenInfo.new(distance / speed, Enum.EasingStyle.Linear),
         {CFrame = CFrame.new(position + Vector3.new(0, 3, 0))}
     )
 
-    tween:Play()
-    tween.Completed:Wait()
+    currentTween:Play()
 end
 
 --// GET NEAREST BREAKABLE
@@ -118,24 +123,27 @@ task.spawn(function()
 
         if target then
             tweenTo(target.position)
-
+        
             local hitCount = 0
-
-            repeat
-                if not enabled then break end
-
+            local startTime = tick()
+        
+            while enabled and target and not target.isBroken and not target.isDestroyed and target.hp > 0 do
                 target:Hit()
                 hitCount += 1
-
-                -- 🔥 Anti-spawn-break protection
-                task.wait(0.1)
-
-                -- stop overhitting (IMPORTANT)
-                if hitCount > 25 then break end
-
-            until target.isBroken or target.isDestroyed or target.hp <= 0
-
-            -- 🔥 give time for respawn system
+        
+                -- 🔥 faster hitting while moving
+                task.wait(0.05)
+        
+                -- safety limits (anti bug / anti spawn break)
+                if hitCount > 30 then break end
+                if tick() - startTime > 3 then break end
+            end
+        
+            -- stop movement after done
+            if currentTween then
+                currentTween:Cancel()
+            end
+        
             task.wait(0.1)
 
         else
