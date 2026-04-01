@@ -143,7 +143,7 @@ task.spawn(function()
         
                     -- 🔥 hit as soon as in range
                     if currentDist <= ATTACK_RANGE then
-                        target:Hit()
+                        --target:Hit()
                         hitCount += 1
                     end
         
