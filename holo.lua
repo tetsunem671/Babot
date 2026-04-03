@@ -15,18 +15,19 @@ local BreakablesClass = require(ReplicatedStorage.Shared.Classes.BreakablesClass
 --// =========================
 local CONFIG = getgenv().CONFIG or {}
 
+local POSITIONS = {
+    ["Position 1"] = Vector3.new(203.75, 398.77, 138.81),
+    ["Position 2"] = Vector3.new(-2199.80, 719.17, 2377.03)
+}
+
+
 local STATE = {
     Enabled = CONFIG.Default or false,
-    SelectedPos = nil,
+    SelectedPos = POSITIONS["Position 1"],
 
     HopEnabled = CONFIG.Serverhop and CONFIG.Serverhop.Enabled or false,
     HopTime = CONFIG.Serverhop and CONFIG.Serverhop.Time or 3600,
     HopStart = tick()
-}
-
-local POSITIONS = {
-    ["Position 1"] = Vector3.new(203.75, 398.77, 138.81),
-    ["Position 2"] = Vector3.new(-2199.80, 719.17, 2377.03)
 }
 
 --// =========================
