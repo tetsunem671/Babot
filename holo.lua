@@ -29,6 +29,34 @@ gui.Name = "AutoBreakGUI"
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
+--// TIMER GUI (TOP RIGHT)
+local timerFrame = Instance.new("Frame")
+timerFrame.Size = UDim2.new(0, 180, 0, 70)
+timerFrame.Position = UDim2.new(1, -200, 0, 20)
+timerFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+timerFrame.BorderSizePixel = 0
+timerFrame.Parent = gui
+
+local timerLabel = Instance.new("TextLabel")
+timerLabel.Size = UDim2.new(1, 0, 0.6, 0)
+timerLabel.Position = UDim2.new(0, 0, 0, 0)
+timerLabel.BackgroundTransparency = 1
+timerLabel.TextColor3 = Color3.new(1,1,1)
+timerLabel.TextScaled = true
+timerLabel.Font = Enum.Font.SourceSansBold
+timerLabel.Text = "Timer: --:--"
+timerLabel.Parent = timerFrame
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, 0, 0.4, 0)
+statusLabel.Position = UDim2.new(0, 0, 0.6, 0)
+statusLabel.BackgroundTransparency = 1
+statusLabel.TextColor3 = Color3.fromRGB(200,200,200)
+statusLabel.TextScaled = true
+statusLabel.Font = Enum.Font.SourceSans
+statusLabel.Text = "Status: Idle"
+statusLabel.Parent = timerFrame
+
 local function createButton(text, y)
     local b = Instance.new("TextButton")
     b.Size = UDim2.new(0, 150, 0, 50)
@@ -200,16 +228,38 @@ task.spawn(function()
     end
 end)
 
+--// TIMER LOOP
 task.spawn(function()
     while true do
         task.wait(1)
 
-        if not hopEnabled then continue end
+        if not hopEnabled then
+            timerLabel.Text = "Timer: OFF"
+            statusLabel.Text = "Status: Disabled"
+            statusLabel.TextColor3 = Color3.fromRGB(150,150,150)
+            continue
+        end
 
-        if tick() - hopStartTime >= hopTime then
-            print("🔁 Server hopping...")
+        local elapsed = tick() - hopStartTime
+        local remaining = math.max(0, hopTime - elapsed)
+
+        local minutes = math.floor(remaining / 60)
+        local seconds = math.floor(remaining % 60)
+
+        timerLabel.Text = string.format("Timer: %02d:%02d", minutes, seconds)
+
+        if remaining > 10 then
+            statusLabel.Text = "Status: Farming"
+            statusLabel.TextColor3 = Color3.fromRGB(0,200,0)
+        elseif remaining > 0 then
+            statusLabel.Text = "Status: Preparing..."
+            statusLabel.TextColor3 = Color3.fromRGB(255,170,0)
+        else
+            statusLabel.Text = "Status: Hopping!"
+            statusLabel.TextColor3 = Color3.fromRGB(255,50,50)
+            task.wait(1)
+                
             serverHop()
-            break -- stop script after teleport
         end
     end
 end)
