@@ -118,7 +118,6 @@ MainTab:CreateDropdown({
     CurrentOption = "Position 1",
     Callback = function(option)
             print(option)
-            print(Options[options])
         STATE.SelectedPos = POSITIONS[Options[option]]
     end
 })
