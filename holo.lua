@@ -1,10 +1,11 @@
 local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TeleportService = game:GetService("TeleportService")
 local Players = game:GetService("Players")
 local BreakablesClass = require(game:GetService("ReplicatedStorage").Shared.Classes.BreakablesClass)
 local player = Players.LocalPlayer
 
-local Knit = require(v2.Packages.knit)
+local Knit = require(ReplicatedStorage.Packages.knit)
 
 --// POSITIONS
 local pos1 = Vector3.new(203.75, 398.77, 138.81)
