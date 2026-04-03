@@ -7,8 +7,6 @@ local TeleportService = game:GetService("TeleportService")
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 
-print("2")
-
 local player = Players.LocalPlayer
 local BreakablesClass = require(ReplicatedStorage.Shared.Classes.BreakablesClass)
 
@@ -119,8 +117,7 @@ MainTab:CreateDropdown({
     Options = {"Position 1", "Position 2"},
     CurrentOption = "Position 1",
     Callback = function(option)
-            print(option)
-        STATE.SelectedPos = POSITIONS[Options[option]]
+        STATE.SelectedPos = POSITIONS[option]
     end
 })
 
@@ -181,6 +178,7 @@ statusLabel.TextScaled = true
 --// =========================
 --// FARM LOOP
 --// =========================
+print(STATE.SelectedPos, STATE.Enabled)
 task.spawn(function()
     local ATTACK_RANGE = 8
 
