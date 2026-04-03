@@ -118,7 +118,8 @@ MainTab:CreateDropdown({
     Options = {"Position 1", "Position 2"},
     CurrentOption = "Position 1",
     Callback = function(option)
-        STATE.SelectedPos = POSITIONS[option]
+        local selected = typeof(option) == "table" and option[1] or option
+        STATE.SelectedPos = POSITIONS[selected]
     end
 })
 
