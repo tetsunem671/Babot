@@ -190,6 +190,7 @@ task.spawn(function()
     while true do
         task.wait(0.1)
 
+        print(selectedPos)
         if not enabled or not selectedPos then continue end
 
         local char = player.Character
