@@ -13,8 +13,6 @@ local config = getgenv().CONFIG or {}
 local selectedPos = config.Default and pos1 or nil 
 local enabled = config.Default and true or false
 
-local privateServerCode = config.PrivateServerCode
-
 local serverhop = config.Serverhop or {}
 local hopEnabled = serverhop.Enabled or false
 local hopTime = serverhop.Time or 3600
@@ -71,17 +69,7 @@ UIS.InputBegan:Connect(function(input, gpe)
 end)
 
 local function serverHop()
-    local code = privateServerCode or nil
-
-    if not code then
-        TeleportService:TeleportToPlaceInstance(
-            game.PlaceId,
-            game.JobId,
-            Players.LocalPlayer
-        )
-    else
-        TeleportService:TeleportToPrivateServer(game.PlaceId, code, {player})
-    end
+    TeleportService:Teleport(game.PlaceId, player)
 end
 
 --// TWEEN (NON-BLOCKING)
