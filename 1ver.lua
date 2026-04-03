@@ -190,7 +190,6 @@ task.spawn(function()
     while true do
         task.wait(0.1)
 
-        print(selectedPos)
         if not enabled or not selectedPos then continue end
 
         local char = player.Character
@@ -201,7 +200,7 @@ task.spawn(function()
         if not hrp or not humanoid then continue end
 
         -- 🔥 stay inside farm zone
-        if (hrp.Position - selectedPos).Magnitude > 120 then
+        if (hrp.Position - selectedPos).Magnitude > 50 then
             tweenTo(selectedPos)
             continue
         end
