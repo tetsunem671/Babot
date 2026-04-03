@@ -4,6 +4,8 @@ local Players = game:GetService("Players")
 local BreakablesClass = require(game:GetService("ReplicatedStorage").Shared.Classes.BreakablesClass)
 local player = Players.LocalPlayer
 
+local Knit = require(v2.Packages.knit)
+
 --// POSITIONS
 local pos1 = Vector3.new(203.75, 398.77, 138.81)
 local pos2 = Vector3.new(-2199.80, 719.17, 2377.03)
@@ -69,7 +71,17 @@ UIS.InputBegan:Connect(function(input, gpe)
 end)
 
 local function serverHop()
-    TeleportService:Teleport(game.PlaceId, player)
+    local success, err = pcall(function()
+        -- upvalues: (ref) v_u_6
+        local AutoReconnectService = Knit.GetService("AutoReconnectService")
+        if AutoReconnectService then
+            AutoReconnectService.RequestReconnect:Fire()
+        end
+    end)
+    if not success then
+        warn("[AutoReconnectController] RequestReconnect failed:", err)
+    end
+    --TeleportService:Teleport(game.PlaceId, player)
 end
 
 --// TWEEN (NON-BLOCKING)
