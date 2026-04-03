@@ -21,7 +21,7 @@ local STATE = {
 
     HopEnabled = CONFIG.Serverhop and CONFIG.Serverhop.Enabled or false,
     HopTime = CONFIG.Serverhop and CONFIG.Serverhop.Time or 3600,
-    HopStart = tick()
+    HopStart = os.clock()
 }
 
 local POSITIONS = {
@@ -159,6 +159,7 @@ MainTab:CreateSlider({
     CurrentValue = STATE.HopTime,
     Callback = function(val)
         STATE.HopTime = val
+        STATE.HopStart = os.clock()
     end
 })
 
@@ -237,7 +238,7 @@ task.spawn(function()
             continue
         end
 
-        local elapsed = tick() - STATE.HopStart
+        local elapsed = os.clock() - STATE.HopStart
         local remaining = math.max(0, STATE.HopTime - elapsed)
 
         local m = math.floor(remaining / 60)
