@@ -5,7 +5,7 @@ local Players = game:GetService("Players")
 local BreakablesClass = require(game:GetService("ReplicatedStorage").Shared.Classes.BreakablesClass)
 local player = Players.LocalPlayer
 
-local Knit = require(ReplicatedStorage.Packages.knit)
+local Knit
 
 --// POSITIONS
 local pos1 = Vector3.new(203.75, 398.77, 138.81)
@@ -74,6 +74,9 @@ end)
 local function serverHop()
     local success, err = pcall(function()
         -- upvalues: (ref) v_u_6
+        if not Knit then
+            Knit = require(ReplicatedStorage.Packages.knit)
+        end
         local AutoReconnectService = Knit.GetService("AutoReconnectService")
         if AutoReconnectService then
             AutoReconnectService.RequestReconnect:Fire()
