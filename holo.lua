@@ -15,18 +15,18 @@ local BreakablesClass = require(ReplicatedStorage.Shared.Classes.BreakablesClass
 --// =========================
 local CONFIG = getgenv().CONFIG or {}
 
-local POSITIONS = {
-    ["Position 1"] = Vector3.new(203.75, 398.77, 138.81),
-    ["Position 2"] = Vector3.new(-2199.80, 719.17, 2377.03)
-}
-
 local STATE = {
     Enabled = CONFIG.Default or false,
-    SelectedPos = POSITIONS["Position 1"],
+    SelectedPos = nil,
 
     HopEnabled = CONFIG.Serverhop and CONFIG.Serverhop.Enabled or false,
     HopTime = CONFIG.Serverhop and CONFIG.Serverhop.Time or 3600,
-    HopStart = os.clock()
+    HopStart = tick()
+}
+
+local POSITIONS = {
+    ["Position 1"] = Vector3.new(203.75, 398.77, 138.81),
+    ["Position 2"] = Vector3.new(-2199.80, 719.17, 2377.03)
 }
 
 --// =========================
@@ -102,22 +102,10 @@ end
 --// =========================
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
-task.spawn(function()
-    task.wait(1) -- wait for Rayfield to fully load
-
-    local gui = game:GetService("CoreGui"):FindFirstChild("Rayfield")
-    if gui then
-        local main = gui:FindFirstChild("Main")
-        if main then
-            main.Position = UDim2.new(0, 20, 1, -300) -- bottom-left
-        end
-    end
-end)
-
 local Window = Rayfield:CreateWindow({
     Name = "Auto Break",
     LoadingTitle = "Auto Farm",
-    LoadingSubtitle = "by dapz",
+    LoadingSubtitle = "by you",
     ConfigurationSaving = {Enabled = false}
 })
 
@@ -129,8 +117,8 @@ MainTab:CreateDropdown({
     Options = {"Position 1", "Position 2"},
     CurrentOption = "Position 1",
     Callback = function(option)
-        print(option)
-        Options[option]
+            print(option)
+            print(Options[options])
         STATE.SelectedPos = POSITIONS[Options[option]]
     end
 })
@@ -240,7 +228,7 @@ task.spawn(function()
             continue
         end
 
-        local elapsed = os.clock() - STATE.HopStart
+        local elapsed = tick() - STATE.HopStart
         local remaining = math.max(0, STATE.HopTime - elapsed)
 
         local m = math.floor(remaining / 60)
