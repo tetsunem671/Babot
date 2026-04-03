@@ -43,34 +43,46 @@ end
 local btn1 = createButton("Position 1", 200)
 local btn2 = createButton("Position 2", 260)
 
-local function toggleEnabled(toggle, pos, b1, b2)
+local function toggleEnabled(pos, activeBtn)
+    enabled = not enabled
     selectedPos = pos
-    enabled = toggle
 
     if enabled then
-        btn1.BackgroundColor3 = b1
-        btn2.BackgroundColor3 = b2
+        if activeBtn == 1 then
+            btn1.BackgroundColor3 = Color3.fromRGB(0,170,0)
+            btn2.BackgroundColor3 = Color3.fromRGB(80,80,80)
+        elseif activeBtn == 2 then
+            btn1.BackgroundColor3 = Color3.fromRGB(80,80,80)
+            btn2.BackgroundColor3 = Color3.fromRGB(0,170,0)
+        end
     else
-        btn1.BackgroundColor3 = b2
-        btn2.BackgroundColor3 = b1
+        -- reset both
+        btn1.BackgroundColor3 = Color3.fromRGB(80,80,80)
+        btn2.BackgroundColor3 = Color3.fromRGB(80,80,80)
     end
 end
 
 --// BUTTON LOGIC
 btn1.MouseButton1Click:Connect(function()
-    toggleEnabled(not enabled, pos1, Color3.fromRGB(0,170,0), Color3.fromRGB(80,80,80))
+    toggleEnabled(pos1, 1)
 end)
 
 btn2.MouseButton1Click:Connect(function()
-    toggleEnabled(not enabled, pos2, Color3.fromRGB(80,80,80), Color3.fromRGB(0,170,0))
+    toggleEnabled(pos2, 2)
 end)
 
 --// STOP (optional: press again to stop)
 local UIS = game:GetService("UserInputService")
+
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
+
     if input.KeyCode == Enum.KeyCode.P then
-        toggleEnabled(nil, nil, Color3.fromRGB(80,80,80), Color3.fromRGB(80,80,80))
+        enabled = false
+        selectedPos = nil
+
+        btn1.BackgroundColor3 = Color3.fromRGB(80,80,80)
+        btn2.BackgroundColor3 = Color3.fromRGB(80,80,80)
     end
 end)
 
