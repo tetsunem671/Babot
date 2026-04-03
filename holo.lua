@@ -7,6 +7,8 @@ local TeleportService = game:GetService("TeleportService")
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 
+print("2")
+
 local player = Players.LocalPlayer
 local BreakablesClass = require(ReplicatedStorage.Shared.Classes.BreakablesClass)
 
