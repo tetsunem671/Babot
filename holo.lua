@@ -22,7 +22,7 @@ local POSITIONS = {
 
 local STATE = {
     Enabled = CONFIG.Default or false,
-    SelectedPos = POSITIONS["Position 1"],
+    SelectedPos = POSITIONS["Position 1"] or nil,
 
     HopEnabled = CONFIG.Serverhop and CONFIG.Serverhop.Enabled or false,
     HopTime = CONFIG.Serverhop and CONFIG.Serverhop.Time or 3600,
