@@ -102,10 +102,22 @@ end
 --// =========================
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
+task.spawn(function()
+    task.wait(1) -- wait for Rayfield to fully load
+
+    local gui = game:GetService("CoreGui"):FindFirstChild("Rayfield")
+    if gui then
+        local main = gui:FindFirstChild("Main")
+        if main then
+            main.Position = UDim2.new(0, 20, 1, -300) -- bottom-left
+        end
+    end
+end)
+
 local Window = Rayfield:CreateWindow({
     Name = "Auto Break",
     LoadingTitle = "Auto Farm",
-    LoadingSubtitle = "by you",
+    LoadingSubtitle = "by dapz",
     ConfigurationSaving = {Enabled = false}
 })
 
