@@ -176,6 +176,7 @@ statusLabel.Size = UDim2.new(1,0,0.4,0)
 statusLabel.Position = UDim2.new(0,0,0.6,0)
 statusLabel.BackgroundTransparency = 1
 statusLabel.TextScaled = true
+timerLabel.TextColor3 = Color3.new(1,1,1)
 
 --// =========================
 --// FARM LOOP
