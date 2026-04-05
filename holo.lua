@@ -25,7 +25,7 @@ local POSITIONS = {
 local STATE = {
     Enabled = CONFIG.Default or false,
     SelectedPos = POSITIONS["Position 1"],
-    CurrentTween = nil
+    CurrentTween = nil,
 
     HopEnabled = CONFIG.Serverhop and CONFIG.Serverhop.Enabled or false,
     HopTime = CONFIG.Serverhop and CONFIG.Serverhop.Time or 3600,
@@ -154,6 +154,14 @@ MainTab:CreateToggle({
     CurrentValue = STATE.Enabled,
     Callback = function(val)
         STATE.Enabled = val
+
+        if not STATE.Enabled then
+            if STATE.CurrentTween then
+                STATE.CurrentTween:Cancel()
+                STATE.CurrentTween = nil
+            end
+            continue
+        end
     end
 })
 
