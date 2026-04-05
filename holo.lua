@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TeleportService = game:GetService("TeleportService")
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
 
 local player = Players.LocalPlayer
 local BreakablesClass = require(ReplicatedStorage.Shared.Classes.BreakablesClass)
@@ -28,6 +29,9 @@ local STATE = {
     HopEnabled = CONFIG.Serverhop and CONFIG.Serverhop.Enabled or false,
     HopTime = CONFIG.Serverhop and CONFIG.Serverhop.Time or 3600,
     HopStart = tick()
+
+    AutoR = false,
+    AutoRDelay = 0.2,
 }
 
 --// =========================
@@ -98,6 +102,13 @@ function METHODS.ServerHop()
     end)
 end
 
+
+function METHODS.PressR()
+    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.R, false, game)
+    task.wait(0.05)
+    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.R, false, game)
+end
+
 --// =========================
 --// RAYFIELD UI
 --// =========================
@@ -129,6 +140,26 @@ MainTab:CreateToggle({
     CurrentValue = STATE.Enabled,
     Callback = function(val)
         STATE.Enabled = val
+    end
+})
+
+--// AUTO R TOGGLE
+MainTab:CreateToggle({
+    Name = "Auto Press R",
+    CurrentValue = STATE.AutoR,
+    Callback = function(val)
+        STATE.AutoR = val
+    end
+})
+
+--// AUTO R SPEED
+MainTab:CreateSlider({
+    Name = "R Delay",
+    Range = {0.05, 1},
+    Increment = 0.05,
+    CurrentValue = STATE.AutoRDelay,
+    Callback = function(val)
+        STATE.AutoRDelay = val
     end
 })
 
@@ -246,6 +277,16 @@ task.spawn(function()
             statusLabel.Text = "Hopping..."
             METHODS.ServerHop()
             break
+        end
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(STATE.AutoRDelay)
+
+        if STATE.AutoR then
+            METHODS.PressR()
         end
     end
 end)
