@@ -28,9 +28,9 @@ local STATE = {
 
     HopEnabled = CONFIG.Serverhop and CONFIG.Serverhop.Enabled or false,
     HopTime = CONFIG.Serverhop and CONFIG.Serverhop.Time or 3600,
-    HopStart = tick()
+    HopStart = tick(),
 
-    AutoR = false,
+    AutoR = CONFIG.AutoR or false,
     AutoRDelay = 0.2,
 }
 
