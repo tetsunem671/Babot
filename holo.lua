@@ -156,6 +156,7 @@ MainTab:CreateToggle({
         STATE.Enabled = val
 
         if not STATE.Enabled then
+            print(STATE.CurrentTween)
             if STATE.CurrentTween then
                 STATE.CurrentTween:Cancel()
                 STATE.CurrentTween = nil
