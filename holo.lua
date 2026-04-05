@@ -150,17 +150,17 @@ MainTab:CreateDropdown({
 
 --// ENABLE TOGGLE
 MainTab:CreateToggle({
-    Name = "Auto Breakables",
+    Name = "Auto Farm",
     CurrentValue = STATE.Enabled,
     Callback = function(val)
         STATE.Enabled = val
 
-        if not STATE.Enabled then
+        if not val then
+            -- cancel tween instantly
             if STATE.CurrentTween then
                 STATE.CurrentTween:Cancel()
                 STATE.CurrentTween = nil
             end
-            continue
         end
     end
 })
@@ -241,7 +241,13 @@ task.spawn(function()
     while true do
         task.wait(0.1)
 
-        if not STATE.Enabled or not STATE.SelectedPos then continue end
+        if not STATE.Enabled or not STATE.SelectedPos then 
+            if STATE.CurrentTween then
+                STATE.CurrentTween:Cancel()
+                STATE.CurrentTween = nil
+            end
+            continue 
+        end
 
         local hrp = METHODS.GetHRP()
         local humanoid = METHODS.GetHumanoid()
