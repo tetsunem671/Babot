@@ -25,6 +25,7 @@ local POSITIONS = {
 local STATE = {
     Enabled = CONFIG.Default or false,
     SelectedPos = POSITIONS["Position 1"],
+    CurrentTween = nil
 
     HopEnabled = CONFIG.Serverhop and CONFIG.Serverhop.Enabled or false,
     HopTime = CONFIG.Serverhop and CONFIG.Serverhop.Time or 3600,
@@ -57,6 +58,12 @@ function METHODS.TweenTo(position)
     local hrp = METHODS.GetHRP()
     if not hrp then return end
 
+    -- cancel previous tween if exists
+    if STATE.CurrentTween then
+        STATE.CurrentTween:Cancel()
+        STATE.CurrentTween = nil
+    end
+
     local distance = (hrp.Position - position).Magnitude
     local speed = 50
 
@@ -66,8 +73,15 @@ function METHODS.TweenTo(position)
         {CFrame = CFrame.new(position + Vector3.new(0,3,0))}
     )
 
+    STATE.CurrentTween = tween
     tween:Play()
-    tween.Completed:Wait()
+
+    -- cleanup when done
+    tween.Completed:Connect(function()
+        if STATE.CurrentTween == tween then
+            STATE.CurrentTween = nil
+        end
+    end)
 end
 
 function METHODS.WalkTo(position)
@@ -136,10 +150,18 @@ MainTab:CreateDropdown({
 
 --// ENABLE TOGGLE
 MainTab:CreateToggle({
-    Name = "Auto Farm",
+    Name = "Auto Breakables",
     CurrentValue = STATE.Enabled,
     Callback = function(val)
         STATE.Enabled = val
+
+        if not STATE.Enabled then
+            if STATE.CurrentTween then
+                STATE.CurrentTween:Cancel()
+                STATE.CurrentTween = nil
+            end
+            continue
+        end
     end
 })
 
