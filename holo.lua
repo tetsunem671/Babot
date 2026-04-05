@@ -33,6 +33,11 @@ local STATE = {
 
     AutoR = CONFIG.AutoR or false,
     AutoRDelay = 0.2,
+
+    CFrameText = "",
+    TweenToCF = false,
+    TweenSpeed = 100,
+    TweenCancel = false,
 }
 
 --// =========================
@@ -52,6 +57,50 @@ end
 function METHODS.GetHumanoid()
     local char = METHODS.GetCharacter()
     return char and char:FindFirstChildOfClass("Humanoid")
+end
+
+function METHODS.StringToCFrame(str)
+    local t = {}
+    for num in string.gmatch(str, "[^,]+") do
+        table.insert(t, tonumber(num))
+    end
+    if #t >= 3 then
+        return CFrame.new(unpack(t))
+    end
+end
+
+function METHODS.TweenToCFrame(cf)
+    local char = METHODS.GetCharacter()
+    local hrp = METHODS.GetHRP()
+    if not char or not hrp then return end
+
+    STATE.TweenCancel = false
+
+    local startCF = hrp.CFrame
+    local distance = (cf.Position - startCF.Position).Magnitude
+    local duration = distance / STATE.TweenSpeed
+
+    local startTime = tick()
+
+    task.spawn(function()
+        while true do
+            if STATE.TweenCancel or not STATE.TweenToCF then
+                break
+            end
+
+            local elapsed = tick() - startTime
+            local alpha = math.clamp(elapsed / duration, 0, 1)
+
+            local newCF = startCF:Lerp(cf, alpha)
+            char:PivotTo(newCF)
+
+            if alpha >= 1 then
+                break
+            end
+
+            task.wait()
+        end
+    end)
 end
 
 function METHODS.TweenTo(position)
@@ -135,11 +184,12 @@ local Window = Rayfield:CreateWindow({
     ConfigurationSaving = {Enabled = false}
 })
 
-local MainTab = Window:CreateTab("Main", 4483362458)
+local FarmTab = Window:CreateTab("Farming", 4483362458)
+local MoveTab = Window:CreateTab("Movement", 4483362458)
+local MiscTab = Window:CreateTab("Misc", 4483362458)
 
---// POSITION SELECTOR
-MainTab:CreateDropdown({
-    Name = "Select Position",
+FarmTab:CreateDropdown({
+    Name = "Farm Position",
     Options = {"Position 1", "Position 2"},
     CurrentOption = "Position 1",
     Callback = function(option)
@@ -148,25 +198,20 @@ MainTab:CreateDropdown({
     end
 })
 
---// ENABLE TOGGLE
-MainTab:CreateToggle({
+FarmTab:CreateToggle({
     Name = "Auto Farm",
     CurrentValue = STATE.Enabled,
     Callback = function(val)
         STATE.Enabled = val
 
-        if not val then
-            -- cancel tween instantly
-            if STATE.CurrentTween then
-                STATE.CurrentTween:Cancel()
-                STATE.CurrentTween = nil
-            end
+        if not val and STATE.CurrentTween then
+            STATE.CurrentTween:Cancel()
+            STATE.CurrentTween = nil
         end
     end
 })
 
---// AUTO R TOGGLE
-MainTab:CreateToggle({
+FarmTab:CreateToggle({
     Name = "Auto Press R",
     CurrentValue = STATE.AutoR,
     Callback = function(val)
@@ -174,8 +219,7 @@ MainTab:CreateToggle({
     end
 })
 
---// AUTO R SPEED
-MainTab:CreateSlider({
+FarmTab:CreateSlider({
     Name = "R Delay",
     Range = {0.05, 1},
     Increment = 0.05,
@@ -185,8 +229,45 @@ MainTab:CreateSlider({
     end
 })
 
---// SERVERHOP TOGGLE
-MainTab:CreateToggle({
+MoveTab:CreateInput({
+    Name = "CFrame (paste here)",
+    PlaceholderText = "x,y,z,...",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(text)
+        STATE.CFrameText = text
+    end
+})
+
+MiscTab:CreateSlider({
+    Name = "Tween Speed",
+    Range = {10, 300},
+    Increment = 10,
+    CurrentValue = STATE.TweenSpeed,
+    Callback = function(val)
+        STATE.TweenSpeed = val
+    end
+})
+
+MiscTab:CreateToggle({
+    Name = "Tween To CFrame",
+    CurrentValue = false,
+    Callback = function(val)
+        STATE.TweenToCF = val
+
+        if val then
+            local cf = METHODS.StringToCFrame(STATE.CFrameText)
+            if cf then
+                METHODS.TweenToCFrame(cf)
+            else
+                warn("Invalid CFrame")
+            end
+        else
+            STATE.TweenCancel = true
+        end
+    end
+})
+
+MiscTab:CreateToggle({
     Name = "Server Hop",
     CurrentValue = STATE.HopEnabled,
     Callback = function(val)
@@ -194,8 +275,7 @@ MainTab:CreateToggle({
     end
 })
 
---// SERVERHOP TIMER
-MainTab:CreateSlider({
+MiscTab:CreateSlider({
     Name = "Hop Time (seconds)",
     Range = {60, 7200},
     Increment = 60,
