@@ -147,7 +147,6 @@ MainTab:CreateDropdown({
         STATE.SelectedPos = POSITIONS[selected]
     end
 })
-print("23")
 
 --// ENABLE TOGGLE
 MainTab:CreateToggle({
@@ -155,18 +154,9 @@ MainTab:CreateToggle({
     CurrentValue = STATE.Enabled,
     Callback = function(val)
         STATE.Enabled = val
-        print("va21")
-        if not STATE.Enabled then
-            print(STATE.CurrentTween)
-            if STATE.CurrentTween then
-                STATE.CurrentTween:Cancel()
-                STATE.CurrentTween = nil
-            end
-            continue
-        end
     end
 })
-print("23")
+
 --// AUTO R TOGGLE
 MainTab:CreateToggle({
     Name = "Auto Press R",
@@ -176,7 +166,6 @@ MainTab:CreateToggle({
     end
 })
 
-print("23")
 --// AUTO R SPEED
 MainTab:CreateSlider({
     Name = "R Delay",
@@ -196,7 +185,6 @@ MainTab:CreateToggle({
         STATE.HopEnabled = val
     end
 })
-print("23")
 
 --// SERVERHOP TIMER
 MainTab:CreateSlider({
@@ -210,7 +198,6 @@ MainTab:CreateSlider({
     end
 })
 
-print("23")
 --// =========================
 --// TIMER GUI (TOP RIGHT)
 --// =========================
