@@ -65,7 +65,7 @@ function METHODS.TweenTo(position)
     end
 
     local distance = (hrp.Position - position).Magnitude
-    local speed = 50
+    local speed = 100
 
     local tween = TweenService:Create(
         hrp,
