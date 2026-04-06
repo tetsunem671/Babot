@@ -24,7 +24,7 @@ local POSITIONS = {
 
 local STATE = {
     Enabled = CONFIG.Default or false,
-    SelectedPos = POSITIONS["Position 1"],
+    SelectedPos = POSITIONS[CONFIG.PositionOption or "Position 1"],
     CurrentTween = nil,
 
     HopEnabled = CONFIG.Serverhop and CONFIG.Serverhop.Enabled or false,
@@ -191,7 +191,7 @@ local MiscTab = Window:CreateTab("Misc", 4483362458)
 FarmTab:CreateDropdown({
     Name = "Farm Position",
     Options = {"Position 1", "Position 2"},
-    CurrentOption = "Position 1",
+    CurrentOption = CONFIG.PositionOption or "Position 1",
     Callback = function(option)
         local selected = typeof(option) == "table" and option[1] or option
         STATE.SelectedPos = POSITIONS[selected]
