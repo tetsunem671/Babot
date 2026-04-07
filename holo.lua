@@ -208,21 +208,6 @@ FarmTab:CreateToggle({
     Callback = function(val)
         STATE.Enabled = val
 
-        if SelectedName == "Position 2" then
-            task.spawn(function()
-                local name = "Easter"
-
-                local svc = Knit.GetService("AreasService")
-                local visual = Knit.GetController("TeleportVisualizerController")
-            
-                -- cancel animation (important)
-                pcall(function()
-                    visual:CancelSequence()
-                    svc.TeleportToLocation:Fire(name)
-                end)
-            end)
-        end
-
         if not val and STATE.CurrentTween then
             STATE.CurrentTween:Cancel()
             STATE.CurrentTween = nil
@@ -335,6 +320,7 @@ timerLabel.TextColor3 = Color3.new(1,1,1)
 --// =========================
 task.spawn(function()
     local ATTACK_RANGE = 8
+    local didTeleport = false -- prevents spam
 
     while true do
         task.wait(0.1)
@@ -344,12 +330,43 @@ task.spawn(function()
                 STATE.CurrentTween:Cancel()
                 STATE.CurrentTween = nil
             end
+            didTeleport = false -- reset when disabled
             continue 
         end
 
         local hrp = METHODS.GetHRP()
         local humanoid = METHODS.GetHumanoid()
         if not hrp or not humanoid then continue end
+
+        -- ✅ TELEPORT LOGIC (runs once)
+        if SelectedName == "Position 2" and not didTeleport then
+            didTeleport = true
+
+            task.spawn(function()
+                local name = "Easter"
+
+                local svc = Knit:GetService("AreasService")
+                local visual = Knit:GetController("TeleportVisualizerController")
+
+                if not svc or not visual then
+                    warn("Teleport services not available")
+                    return
+                end
+
+                pcall(function()
+                    visual:CancelSequence()
+                    svc.TeleportToLocation:Fire(name)
+                end)
+            end)
+
+            task.wait(2) -- give time to teleport
+            continue
+        end
+
+        -- reset if switching away from Position 2
+        if SelectedName ~= "Position 2" then
+            didTeleport = false
+        end
 
         if (hrp.Position - STATE.SelectedPos).Magnitude > 60 then
             METHODS.TweenTo(STATE.SelectedPos)
