@@ -194,22 +194,6 @@ function METHODS.WaitUntilReady()
     print("✅ Everything ready")
 end
 
-function METHODS.FindTeleportName(keyword)
-    for _, v in pairs(workspace:GetDescendants()) do
-        if v:IsA("Model") then
-            local attr = v:GetAttribute("TeleportTarget")
-
-            if attr and string.find(string.lower(attr), string.lower(keyword)) then
-                return attr
-            end
-
-            if string.find(string.lower(v.Name), string.lower(keyword)) then
-                return v.Name
-            end
-        end
-    end
-end
-
 function METHODS.TeleportSmart(targetName)
     local svc = Knit.GetService("AreasService")
     local visual = Knit.GetController("TeleportVisualizerController")
@@ -257,8 +241,7 @@ FarmTab:CreateDropdown({
     
         if selected == "Position 2" then
             task.spawn(function()
-                local name = METHODS.FindTeleportName("easter") or "Easter"
-                print(name)
+                local name = "Easter"
     
                 METHODS.TeleportSmart(name)
             end)
