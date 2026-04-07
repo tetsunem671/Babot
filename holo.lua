@@ -173,6 +173,44 @@ function METHODS.PressR()
     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.R, false, game)
 end
 
+function METHODS.FindTeleportName(keyword)
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("Model") then
+            local attr = v:GetAttribute("TeleportTarget")
+
+            if attr and string.find(string.lower(attr), string.lower(keyword)) then
+                return attr
+            end
+
+            if string.find(string.lower(v.Name), string.lower(keyword)) then
+                return v.Name
+            end
+        end
+    end
+end
+
+function METHODS.TeleportSmart(targetName)
+    local svc = Knit.GetService("AreasService")
+    local visual = Knit.GetController("TeleportVisualizerController")
+
+    -- cancel animation (important)
+    pcall(function()
+        visual:CancelSequence()
+    end)
+
+    -- try TeleportToArea first
+    local success = pcall(function()
+        svc.TeleportToArea:Fire(targetName)
+    end)
+
+    -- fallback to TeleportToLocation
+    task.wait(0.5)
+
+    pcall(function()
+        svc.TeleportToLocation:Fire(targetName)
+    end)
+end
+
 --// =========================
 --// RAYFIELD UI
 --// =========================
@@ -199,7 +237,11 @@ FarmTab:CreateDropdown({
         STATE.SelectedPos = POSITIONS[selected]
     
         if selected == "Position 2" then
-            METHODS.TweenTo(Vector3.new(242.3540496826172, 401.792236328125, 256.85858154296875))
+            task.spawn(function()
+                local name = METHODS.FindTeleportName("easter") or "Easter"
+    
+                METHODS.TeleportSmart(name)
+            end)
         end
     end
 })
