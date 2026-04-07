@@ -2,15 +2,14 @@
 -- Services
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
 
--- Events
+-- Events & Modules
 local PurchaseEvent = ReplicatedStorage:WaitForChild("Events"):WaitForChild("PurchaseConveyorEgg")
 local SharedEggs = require(ReplicatedStorage.Modules.Gameplay.Shared_Eggs)
 
--- Rayfield UI
-print("67")
+-- Rayfield UI (fixed 404)
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 -- State
@@ -19,6 +18,9 @@ local STATE = {
     SelectedEggs = {},
     SelectedMutations = {}
 }
+
+-- Wait for Plots folder
+local PlotsFolder = workspace:WaitForChild("Core"):WaitForChild("Scriptable"):WaitForChild("Plots")
 
 -- Create Window
 local Window = Rayfield:CreateWindow({
@@ -30,9 +32,7 @@ local Window = Rayfield:CreateWindow({
         FolderName = "EggAutoBuyer",
         FileName = "Config"
     },
-    Discord = {
-        Enabled = false
-    },
+    Discord = { Enabled = false },
     KeySystem = false
 })
 
@@ -47,9 +47,17 @@ local AutoBuyToggle = Window:CreateToggle({
 })
 
 -- Egg Multi-Select Dropdown
+local eggOptions = {}
+pcall(function()
+    eggOptions = SharedEggs.GetEggNames()
+end)
+if type(eggOptions) ~= "table" then
+    eggOptions = {}
+end
+
 local EggDropdown = Window:CreateDropdown({
     Name = "Select Eggs",
-    Options = SharedEggs.GetEggNames(), -- Make sure this returns a table of all egg names
+    Options = eggOptions,
     MultiSelection = true,
     CurrentOption = {},
     Flag = "EggDropdownFlag",
@@ -61,7 +69,7 @@ local EggDropdown = Window:CreateDropdown({
 -- Mutation Multi-Select Dropdown
 local MutationDropdown = Window:CreateDropdown({
     Name = "Select Mutations",
-    Options = {"Mutation1","Mutation2","Mutation3","Mutation4"}, -- Replace with your mutation list
+    Options = {"Mutation1","Mutation2","Mutation3","Mutation4"}, -- Replace with your mutations
     MultiSelection = true,
     CurrentOption = {},
     Flag = "MutationDropdownFlag",
@@ -71,21 +79,18 @@ local MutationDropdown = Window:CreateDropdown({
 })
 
 -- Auto-Buy Logic
-RunService.Heartbeat:Connect(function(dt)
+RunService.Heartbeat:Connect(function()
     if not STATE.AutoBuy then return end
 
-    -- Loop through all plots / conveyors
-    for _, plot in pairs(workspace.Core.Scriptable.Plots:GetChildren()) do
+    for _, plot in pairs(PlotsFolder:GetChildren()) do
         if plot:FindFirstChild("Conveyor") and plot:FindFirstChild("Eggs") then
             for _, egg in pairs(plot.Eggs:GetChildren()) do
                 local eggName = egg:GetAttribute("baseName")
                 local eggModifiers = egg:GetAttribute("modifiers")
                 local canBuy = false
 
-                -- Check if this egg is in selected eggs
                 if table.find(STATE.SelectedEggs, eggName) then
-                    -- If mutations selected, check if egg matches any mutation
-                    if #STATE.SelectedMutations > 0 and eggModifiers then
+                    if #STATE.SelectedMutations > 0 and typeof(eggModifiers) == "string" then
                         for mut in eggModifiers:gmatch("([^,]+)") do
                             mut = mut:match("^%s*(.-)%s*$")
                             if table.find(STATE.SelectedMutations, mut) then
@@ -98,7 +103,6 @@ RunService.Heartbeat:Connect(function(dt)
                     end
                 end
 
-                -- Fire server if conditions met
                 if canBuy then
                     pcall(function()
                         PurchaseEvent:FireServer(eggName, tonumber(plot.Name))
