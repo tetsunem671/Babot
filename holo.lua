@@ -358,6 +358,7 @@ task.spawn(function()
                     task.wait(1)
                     METHODS.TweenTo(STATE.SelectedPos)
                     task.wait(1) -- give time to teleport
+                    didTeleport = false
                     continue
                 end
             else
