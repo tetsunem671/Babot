@@ -36,7 +36,7 @@ local EggNames = {}
 pcall(function()
     local EggsModule = require(ReplicatedStorage.Modules.Gameplay.Shared_Eggs)
 
-    for name,_ in pairs(EggsModule) do
+    for name,_ in pairs(EggsModule.AssetName) do
         table.insert(EggNames, name)
     end
 end)
@@ -60,15 +60,6 @@ local success, ModModule = pcall(function()
 end)
 
 if success and ModModule then
-    -- case 1: normal table
-    for k,v in pairs(ModModule) do
-        if type(k) == "string" then
-            table.insert(Mutations, k)
-        elseif type(v) == "table" and v.Name then
-            table.insert(Mutations, v.Name)
-        end
-    end
-
     -- case 2: nested
     if ModModule.Modifiers then
         for k,_ in pairs(ModModule.Modifiers) do
