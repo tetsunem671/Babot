@@ -4,7 +4,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
-print("67")
+print("69")
 -- Events & Modules
 local PurchaseEvent = ReplicatedStorage:WaitForChild("Events"):WaitForChild("PurchaseConveyorEgg")
 local SharedEggs = require(ReplicatedStorage.Modules.Gameplay.Shared_Eggs)
@@ -96,7 +96,7 @@ local SearchBox = AutoTab:CreateInput({
         end
 
         -- If nothing matches, just show an empty table to avoid errors
-        EggDropdown:Set(filtered or {})
+        EggDropdown:Refresh(filtered or {})
     end
 })
 
@@ -149,7 +149,7 @@ local SearchMutations = AutoTab:CreateInput({
                 table.insert(filtered, mutation)
             end
         end
-        MutationDropdown:Set(filtered or {})
+        MutationDropdown:Refresh(filtered or {})
     end
 })
 
