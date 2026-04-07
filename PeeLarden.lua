@@ -80,6 +80,20 @@ local EggDropdown = AutoTab:CreateDropdown({
     end
 })
 
+local SearchBox = AutoTab:CreateInput({
+    Name = "Search Eggs",
+    PlaceholderText = "Type egg name...",
+    Callback = function(text)
+        local filtered = {}
+        for _, egg in ipairs(eggOptions) do
+            if egg:lower():find(text:lower()) then
+                table.insert(filtered, egg)
+            end
+        end
+        EggDropdown:SetOptions(filtered)
+    end
+})
+
 AutoTab:CreateButton({
     Name = "Select All Eggs",
     Callback = function()
@@ -110,6 +124,20 @@ local MutationDropdown = AutoTab:CreateDropdown({
     Flag = "MutationDropdownFlag",
     Callback = function(selected)
         STATE.SelectedMutations = selected
+    end
+})
+
+local SearchMutations = AutoTab:CreateInput({
+    Name = "Search Eggs",
+    PlaceholderText = "Type egg name...",
+    Callback = function(text)
+        local filtered = {}
+        for _, mutation in ipairs(ModifierOptions) do
+            if mutation:lower():find(text:lower()) then
+                table.insert(filtered, mutation)
+            end
+        end
+        MutationDropdown:SetOptions(filtered)
     end
 })
 
