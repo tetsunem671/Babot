@@ -349,17 +349,13 @@ task.spawn(function()
                         local svc = Knit.GetService("AreasService")
                         local visual = Knit.GetController("TeleportVisualizerController")    
         
-                        if not svc or not visual then
-                            warn("Teleport services not available")
-                            return
-                        end
-        
                         pcall(function()
                             visual:CancelSequence()
                             svc.TeleportToLocation:Fire("Easter")
                         end)
                     end)
         
+                    METHODS.TweenTo(STATE.SelectedPos)
                     task.wait(2) -- give time to teleport
                     continue
                 end
