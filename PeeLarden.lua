@@ -80,18 +80,23 @@ local EggDropdown = AutoTab:CreateDropdown({
     end
 })
 
-local EggSearchBox = AutoTab:CreateInput({
+local SearchBox = AutoTab:CreateInput({
     Name = "Search Eggs",
     PlaceholderText = "Type egg name...",
-    Flag = "EggSearchBoxFlag",
+    Flag = "SearchEggFlag",
     Callback = function(text)
+        -- Always ensure text is a string
+        text = tostring(text or "")
+
         local filtered = {}
         for _, egg in ipairs(eggOptions) do
             if egg:lower():find(text:lower()) then
                 table.insert(filtered, egg)
             end
         end
-        EggDropdown:SetOptions(filtered)
+
+        -- If nothing matches, just show an empty table to avoid errors
+        EggDropdown:SetOptions(filtered or {})
     end
 })
 
@@ -134,15 +139,16 @@ local MutationDropdown = AutoTab:CreateDropdown({
 local SearchMutations = AutoTab:CreateInput({
     Name = "Search Mutations",
     PlaceholderText = "Type Mutation name...",
-    Flag = "MutationSearchBoxFlag",
+    Flag = "SearchMutationFlag",
     Callback = function(text)
+        text = tostring(text or "")
         local filtered = {}
         for _, mutation in ipairs(ModifierOptions) do
             if mutation:lower():find(text:lower()) then
                 table.insert(filtered, mutation)
             end
         end
-        MutationDropdown:SetOptions(filtered)
+        MutationDropdown:SetOptions(filtered or {})
     end
 })
 
