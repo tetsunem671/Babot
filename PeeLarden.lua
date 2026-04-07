@@ -162,9 +162,17 @@ RunService.Heartbeat:Connect(function()
                 end
 
                 if canBuy then
-                    pcall(function()
-                        PurchaseEvent:FireServer(eggName, tonumber(plot.Name))
-                    end)
+                    local prompt = egg:FindFirstChildWhichIsA("ProximityPrompt")
+                    if prompt then
+                        task.spawn(function()
+                            -- trigger the prompt as the player
+                            prompt:InputHoldBegin()
+                            task.wait(0.5)
+                            prompt:InputHoldEnd()
+                        end)
+                    else
+                        warn("No ProximityPrompt found for egg:", eggName)
+                    end
                 end
             end
         end
