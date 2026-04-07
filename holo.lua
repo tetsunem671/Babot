@@ -196,8 +196,19 @@ FarmTab:CreateDropdown({
     CurrentOption = CONFIG.PositionOption or "Position 1",
     Callback = function(option)
         local selected = typeof(option) == "table" and option[1] or option
-    
-        if selected == "Position 2" then
+
+        SelectedName = selected
+        STATE.SelectedPos = POSITIONS[selected]
+    end
+})
+
+FarmTab:CreateToggle({
+    Name = "Auto Farm",
+    CurrentValue = STATE.Enabled,
+    Callback = function(val)
+        STATE.Enabled = val
+
+        if SelectedName == "Position 2" then
             task.spawn(function()
                 local name = "Easter"
 
@@ -211,17 +222,6 @@ FarmTab:CreateDropdown({
                 end)
             end)
         end
-
-        SelectedName = selected
-        STATE.SelectedPos = POSITIONS[selected]
-    end
-})
-
-FarmTab:CreateToggle({
-    Name = "Auto Farm",
-    CurrentValue = STATE.Enabled,
-    Callback = function(val)
-        STATE.Enabled = val
 
         if not val and STATE.CurrentTween then
             STATE.CurrentTween:Cancel()
