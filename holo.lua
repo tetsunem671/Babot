@@ -338,38 +338,37 @@ task.spawn(function()
         local humanoid = METHODS.GetHumanoid()
         if not hrp or not humanoid then continue end
 
-        -- ✅ TELEPORT LOGIC (runs once)
-        if SelectedName == "Position 2" and not didTeleport then
-            didTeleport = true
-
-            task.spawn(function()
-                local name = "Easter"
-
-                local svc = Knit:GetService("AreasService")
-                local visual = Knit:GetController("TeleportVisualizerController")
-
-                if not svc or not visual then
-                    warn("Teleport services not available")
-                    return
-                end
-
-                pcall(function()
-                    visual:CancelSequence()
-                    svc.TeleportToLocation:Fire(name)
-                end)
-            end)
-
-            task.wait(2) -- give time to teleport
-            continue
-        end
-
-        -- reset if switching away from Position 2
-        if SelectedName ~= "Position 2" then
-            didTeleport = false
-        end
-
         if (hrp.Position - STATE.SelectedPos).Magnitude > 60 then
-            METHODS.TweenTo(STATE.SelectedPos)
+            -- ✅ TELEPORT LOGIC (runs once)
+            if SelectedName == "Position 2" then
+                if not didTeleport then
+                    print("123")
+                    didTeleport = true
+        
+                    task.spawn(function()
+                        local name = "Easter"
+        
+                        local svc = Knit:GetService("AreasService")
+                        local visual = Knit:GetController("TeleportVisualizerController")
+        
+                        if not svc or not visual then
+                            warn("Teleport services not available")
+                            return
+                        end
+        
+                        pcall(function()
+                            visual:CancelSequence()
+                            svc.TeleportToLocation:Fire(name)
+                        end)
+                    end)
+        
+                    task.wait(2) -- give time to teleport
+                    continue
+                end
+            else
+                didTeleport = false
+                METHODS.TweenTo(STATE.SelectedPos)
+            end
             continue
         end
 
