@@ -354,9 +354,10 @@ task.spawn(function()
                             svc.TeleportToLocation:Fire("Easter")
                         end)
                     end)
-        
+
+                    task.wait(1)
                     METHODS.TweenTo(STATE.SelectedPos)
-                    task.wait(2) -- give time to teleport
+                    task.wait(1) -- give time to teleport
                     continue
                 end
             else
