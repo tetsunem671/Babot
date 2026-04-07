@@ -8,6 +8,8 @@ local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 
+local Knit = require(ReplicatedStorage.Packages.knit)
+
 local player = Players.LocalPlayer
 local BreakablesClass = require(ReplicatedStorage.Shared.Classes.BreakablesClass)
 
@@ -158,7 +160,6 @@ end
 
 function METHODS.ServerHop()
     pcall(function()
-        local Knit = require(ReplicatedStorage.Packages.knit)
         local svc = Knit.GetService("AutoReconnectService")
         if svc then
             svc.RequestReconnect:Fire()
