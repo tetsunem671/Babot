@@ -4,7 +4,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
-print("61")
+print("69")
 -- Events & Modules
 local PurchaseEvent = ReplicatedStorage:WaitForChild("Events"):WaitForChild("PurchaseConveyorEgg")
 local SharedEggs = require(ReplicatedStorage.Modules.Gameplay.Shared_Eggs)
@@ -157,53 +157,54 @@ AutoTab:CreateButton({
     end
 })
 
--- Auto-Buy Logic
-while true do
-    task.wait(0.2)
-    if not STATE.AutoBuy then return end
+task.spawn(function()
+    while true do
+        task.wait(0.2)
+        if not STATE.AutoBuy then continue end  -- just skip this tick, don’t exit the loop
 
-    for _, plot in pairs(PlotsFolder:GetChildren()) do
-        if plot:FindFirstChild("Conveyor") and plot:FindFirstChild("Eggs") then
-            for _, egg in pairs(plot.Eggs:GetChildren()) do
-                local eggName = egg:GetAttribute("baseName")
-                local eggModifiers = egg:GetAttribute("modifiers") -- string or nil
-                local canBuy = false
+        for _, plot in pairs(PlotsFolder:GetChildren()) do
+            if plot:FindFirstChild("Conveyor") and plot:FindFirstChild("Eggs") then
+                for _, egg in pairs(plot.Eggs:GetChildren()) do
+                    local eggName = egg:GetAttribute("baseName")
+                    local eggModifiers = egg:GetAttribute("modifiers")
+                    local canBuy = false
 
-                if table.find(STATE.SelectedEggs, eggName) then
-                    if #STATE.SelectedMutations > 0 then
-                        -- if egg has modifiers
-                        if typeof(eggModifiers) == "string" and eggModifiers ~= "" then
-                            for mut in eggModifiers:gmatch("([^,]+)") do
-                                mut = mut:match("^%s*(.-)%s*$")
-                                if table.find(STATE.SelectedMutations, mut) then
-                                    canBuy = true
-                                    break
+                    if table.find(STATE.SelectedEggs, eggName) then
+                        if #STATE.SelectedMutations > 0 then
+                            if typeof(eggModifiers) == "string" and eggModifiers ~= "" then
+                                for mut in eggModifiers:gmatch("([^,]+)") do
+                                    mut = mut:match("^%s*(.-)%s*$")
+                                    if table.find(STATE.SelectedMutations, mut) then
+                                        canBuy = true
+                                        break
+                                    end
                                 end
+                            else
+                                canBuy = true
                             end
                         else
-                            -- egg has no modifiers → still buy
                             canBuy = true
                         end
-                    else
-                        -- no mutation filter → buy all selected eggs
-                        canBuy = true
                     end
-                end
 
-                if canBuy then
-                    local prompt = egg:FindFirstChildWhichIsA("ProximityPrompt")
-                    if prompt then
-                        task.spawn(function()
-                            -- trigger the prompt as the player
-                            prompt:InputHoldBegin()
-                            task.wait(0.5)
-                            prompt:InputHoldEnd()
-                        end)
-                    else
-                        warn("No ProximityPrompt found for egg:", eggName)
+                    if canBuy then
+                        local prompt = egg:FindFirstChildWhichIsA("ProximityPrompt")
+                        if prompt then
+                            -- only trigger if not already bought / in progress
+                            if not prompt:GetAttribute("TriggeredByScript") then
+                                prompt:SetAttribute("TriggeredByScript", true)
+                                task.spawn(function()
+                                    prompt:InputHoldBegin()
+                                    task.wait(0.5)
+                                    prompt:InputHoldEnd()
+                                    task.wait(0.1)
+                                    prompt:SetAttribute("TriggeredByScript", false)
+                                end)
+                            end
+                        end
                     end
                 end
             end
         end
     end
-end
+end)
