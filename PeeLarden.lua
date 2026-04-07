@@ -72,7 +72,7 @@ local eggOptions = extractEggKeys(SharedEggs)
 local EggDropdown = AutoTab:CreateDropdown({
     Name = "Select Eggs",
     Options = eggOptions,
-    MultiSelection = true,
+    MultipleOptions = true,
     CurrentOption = {},
     Flag = "EggDropdownFlag",
     Callback = function(selected)
@@ -89,7 +89,7 @@ end
 local MutationDropdown = AutoTab:CreateDropdown({
     Name = "Select Mutations",
     Options = ModifierOptions, -- Replace with your mutations
-    MultiSelection = true,
+    MultipleOptions = true,
     CurrentOption = {},
     Flag = "MutationDropdownFlag",
     Callback = function(selected)
