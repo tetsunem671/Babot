@@ -190,8 +190,6 @@ function METHODS.WaitUntilReady()
     end)
 
     repeat task.wait() until started
-
-    print("✅ Everything ready")
 end
 
 function METHODS.TeleportSmart(targetName)
@@ -201,17 +199,6 @@ function METHODS.TeleportSmart(targetName)
     -- cancel animation (important)
     pcall(function()
         visual:CancelSequence()
-    end)
-
-    -- try TeleportToArea first
-    local success = pcall(function()
-        svc.TeleportToArea:Fire(targetName)
-    end)
-
-    -- fallback to TeleportToLocation
-    task.wait(0.5)
-
-    pcall(function()
         svc.TeleportToLocation:Fire(targetName)
     end)
 end
@@ -368,7 +355,6 @@ timerLabel.TextColor3 = Color3.new(1,1,1)
 --// =========================
 --// FARM LOOP
 --// =========================
-print(STATE.SelectedPos, STATE.Enabled)
 task.spawn(function()
     local ATTACK_RANGE = 8
 
