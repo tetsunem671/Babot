@@ -197,6 +197,10 @@ FarmTab:CreateDropdown({
         local selected = typeof(option) == "table" and option[1] or option
         SelectedName = selected
         STATE.SelectedPos = POSITIONS[selected]
+    
+        if selected == "Position 2" then
+            METHODS.TweenTo(Vector3.new(242.3540496826172, 401.792236328125, 256.85858154296875))
+        end
     end
 })
 
@@ -335,12 +339,8 @@ task.spawn(function()
         local humanoid = METHODS.GetHumanoid()
         if not hrp or not humanoid then continue end
 
-        if (hrp.Position - STATE.SelectedPos).Magnitude > 100 then
-            if SelectedName == "Position 2" then
-                METHODS.TweenTo(Vector3.new(242.3540496826172, 401.792236328125, 256.85858154296875))
-            else
-                METHODS.TweenTo(STATE.SelectedPos)
-            end
+        if (hrp.Position - STATE.SelectedPos).Magnitude > 60 then
+            METHODS.TweenTo(STATE.SelectedPos)
             continue
         end
 
