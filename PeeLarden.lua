@@ -4,7 +4,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
-print("69")
+print("63")
 -- Events & Modules
 local PurchaseEvent = ReplicatedStorage:WaitForChild("Events"):WaitForChild("PurchaseConveyorEgg")
 local SharedEggs = require(ReplicatedStorage.Modules.Gameplay.Shared_Eggs)
@@ -80,6 +80,22 @@ local EggDropdown = AutoTab:CreateDropdown({
     end
 })
 
+AutoTab:CreateButton({
+    Name = "Select All Eggs",
+    Callback = function()
+        STATE.SelectedEggs = eggOptions
+        EggDropdown:Set(eggOptions) -- selects all eggs
+    end
+})
+
+AutoTab:CreateButton({
+    Name = "Clear Eggs",
+    Callback = function()
+        STATE.SelectedEggs = {}
+        EggDropdown:Set({}) -- clears all selections
+    end
+})
+
 local ModifierOptions = {}
 for key, _ in pairs(SharedModifiers.Modifiers) do
     table.insert(ModifierOptions, key)
@@ -97,6 +113,22 @@ local MutationDropdown = AutoTab:CreateDropdown({
     end
 })
 
+AutoTab:CreateButton({
+    Name = "Select All Mutations",
+    Callback = function()
+        STATE.SelectedMutations = ModifierOptions
+        MutationDropdown:Set(ModifierOptions)
+    end
+})
+
+AutoTab:CreateButton({
+    Name = "Clear Mutations",
+    Callback = function()
+        STATE.SelectedMutations = {}
+        MutationDropdown:Set({})
+    end
+})
+
 -- Auto-Buy Logic
 RunService.Heartbeat:Connect(function()
     if not STATE.AutoBuy then return end
@@ -105,19 +137,26 @@ RunService.Heartbeat:Connect(function()
         if plot:FindFirstChild("Conveyor") and plot:FindFirstChild("Eggs") then
             for _, egg in pairs(plot.Eggs:GetChildren()) do
                 local eggName = egg:GetAttribute("baseName")
-                local eggModifiers = egg:GetAttribute("modifiers")
+                local eggModifiers = egg:GetAttribute("modifiers") -- string or nil
                 local canBuy = false
 
                 if table.find(STATE.SelectedEggs, eggName) then
-                    if #STATE.SelectedMutations > 0 and typeof(eggModifiers) == "string" then
-                        for mut in eggModifiers:gmatch("([^,]+)") do
-                            mut = mut:match("^%s*(.-)%s*$")
-                            if table.find(STATE.SelectedMutations, mut) then
-                                canBuy = true
-                                break
+                    if #STATE.SelectedMutations > 0 then
+                        -- if egg has modifiers
+                        if typeof(eggModifiers) == "string" and eggModifiers ~= "" then
+                            for mut in eggModifiers:gmatch("([^,]+)") do
+                                mut = mut:match("^%s*(.-)%s*$")
+                                if table.find(STATE.SelectedMutations, mut) then
+                                    canBuy = true
+                                    break
+                                end
                             end
+                        else
+                            -- egg has no modifiers → still buy
+                            canBuy = true
                         end
-                    elseif #STATE.SelectedMutations == 0 then
+                    else
+                        -- no mutation filter → buy all selected eggs
                         canBuy = true
                     end
                 end
