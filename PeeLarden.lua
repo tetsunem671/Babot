@@ -4,7 +4,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
-print("67")
+print("61")
 -- Events & Modules
 local PurchaseEvent = ReplicatedStorage:WaitForChild("Events"):WaitForChild("PurchaseConveyorEgg")
 local SharedEggs = require(ReplicatedStorage.Modules.Gameplay.Shared_Eggs)
@@ -130,7 +130,8 @@ AutoTab:CreateButton({
 })
 
 -- Auto-Buy Logic
-RunService.Heartbeat:Connect(function()
+while true do
+    task.wait(0.2)
     if not STATE.AutoBuy then return end
 
     for _, plot in pairs(PlotsFolder:GetChildren()) do
@@ -177,4 +178,4 @@ RunService.Heartbeat:Connect(function()
             end
         end
     end
-end)
+end
