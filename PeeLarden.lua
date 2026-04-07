@@ -96,9 +96,10 @@ local SearchBox = AutoTab:CreateInput({
         end
 
         -- If nothing matches, just show an empty table to avoid errors
-        EggDropdown:SetOptions(filtered or {})
+        EggDropdown:Set(filtered or {})
     end
 })
+
 
 AutoTab:CreateButton({
     Name = "Select All Eggs",
@@ -148,7 +149,7 @@ local SearchMutations = AutoTab:CreateInput({
                 table.insert(filtered, mutation)
             end
         end
-        MutationDropdown:SetOptions(filtered or {})
+        MutationDropdown:Set(filtered or {})
     end
 })
 
