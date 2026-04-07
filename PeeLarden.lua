@@ -37,13 +37,11 @@ local Window = Rayfield:CreateWindow({
 })
 
 -- Create a Tab
-local MainTab = Window:CreateTab("Main")
-
--- Create a Section (this is what you meant by "tag")
-local AutoBuySection = MainTab:CreateSection("Auto-Buy Options")
+local MainTab = Window:CreateTab("Main", 4483362458)
+local AutoTab = Window:CreateTab("Auto", 4483362458)
 
 -- Auto-Buy Toggle
-local AutoBuyToggle = AutoBuySection:CreateToggle({
+local AutoBuyToggle = AutoTab:CreateToggle({
     Name = "Enable Auto-Buy",
     CurrentValue = false,
     Flag = "AutoBuyFlag",
@@ -61,7 +59,7 @@ if type(eggOptions) ~= "table" then
     eggOptions = {}
 end
 
-local EggDropdown = AutoBuySection:CreateDropdown({
+local EggDropdown = AutoTab:CreateDropdown({
     Name = "Select Eggs",
     Options = eggOptions,
     MultiSelection = true,
@@ -73,7 +71,7 @@ local EggDropdown = AutoBuySection:CreateDropdown({
 })
 
 -- Mutation Multi-Select Dropdown
-local MutationDropdown = AutoBuySection:CreateDropdown({
+local MutationDropdown = AutoTab:CreateDropdown({
     Name = "Select Mutations",
     Options = {"Mutation1","Mutation2","Mutation3","Mutation4"}, -- Replace with your mutations
     MultiSelection = true,
