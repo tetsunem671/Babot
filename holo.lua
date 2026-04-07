@@ -174,35 +174,6 @@ function METHODS.PressR()
     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.R, false, game)
 end
 
-function METHODS.WaitUntilReady()
-    -- wait for player + character
-    repeat task.wait() until player
-    repeat task.wait() until player.Character
-    repeat task.wait() until player.Character:FindFirstChild("HumanoidRootPart")
-
-    -- wait for Knit to fully start
-    local started = false
-
-    Knit.Start():andThen(function()
-        started = true
-    end):catch(function(err)
-        warn("Knit failed:", err)
-    end)
-
-    repeat task.wait() until started
-end
-
-function METHODS.TeleportSmart(targetName)
-    local svc = Knit.GetService("AreasService")
-    local visual = Knit.GetController("TeleportVisualizerController")
-
-    -- cancel animation (important)
-    pcall(function()
-        visual:CancelSequence()
-        svc.TeleportToLocation:Fire(targetName)
-    end)
-end
-
 --// =========================
 --// RAYFIELD UI
 --// =========================
@@ -229,8 +200,15 @@ FarmTab:CreateDropdown({
         if selected == "Position 2" then
             task.spawn(function()
                 local name = "Easter"
-    
-                METHODS.TeleportSmart(name)
+
+                local svc = Knit.GetService("AreasService")
+                local visual = Knit.GetController("TeleportVisualizerController")
+            
+                -- cancel animation (important)
+                pcall(function()
+                    visual:CancelSequence()
+                    svc.TeleportToLocation:Fire(name)
+                end)
             end)
         end
 
