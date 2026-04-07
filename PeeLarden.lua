@@ -10,6 +10,7 @@ local PurchaseEvent = ReplicatedStorage:WaitForChild("Events"):WaitForChild("Pur
 local SharedEggs = require(ReplicatedStorage.Modules.Gameplay.Shared_Eggs)
 
 -- Rayfield UI
+print("67")
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 -- State
