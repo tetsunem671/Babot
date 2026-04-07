@@ -8,6 +8,7 @@ local LocalPlayer = Players.LocalPlayer
 -- Events & Modules
 local PurchaseEvent = ReplicatedStorage:WaitForChild("Events"):WaitForChild("PurchaseConveyorEgg")
 local SharedEggs = require(ReplicatedStorage.Modules.Gameplay.Shared_Eggs)
+local SharedModifiers = require(ReplicatedStorage.Modules.Gameplay.Shared_Modifiers)
 
 -- Rayfield UI (fixed 404)
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
@@ -50,14 +51,23 @@ local AutoBuyToggle = AutoTab:CreateToggle({
     end
 })
 
--- Egg Multi-Select Dropdown
-local eggOptions = {}
-pcall(function()
-    eggOptions = SharedEggs.GetEggNames()
-end)
-if type(eggOptions) ~= "table" then
-    eggOptions = {}
+-- Recursively extract all egg keys (exact names used in Workspace)
+local function extractEggKeys(tbl, result)
+    result = result or {}
+    for key, value in pairs(tbl) do
+        if type(value) == "table" then
+            -- if table has AssetName, we consider this a leaf egg table
+            if value.AssetName then
+                table.insert(result, key) -- use the exact key instead of AssetName
+            end
+            -- recurse deeper in case of nested tables
+            extractEggKeys(value, result)
+        end
+    end
+    return result
 end
+
+local eggOptions = extractEggKeys(SharedEggs)
 
 local EggDropdown = AutoTab:CreateDropdown({
     Name = "Select Eggs",
@@ -70,10 +80,15 @@ local EggDropdown = AutoTab:CreateDropdown({
     end
 })
 
+local ModifierOptions = {}
+for key, _ in pairs(SharedModifiers.Modifiers) do
+    table.insert(ModifierOptions, key)
+end
+
 -- Mutation Multi-Select Dropdown
 local MutationDropdown = AutoTab:CreateDropdown({
     Name = "Select Mutations",
-    Options = {"Mutation1","Mutation2","Mutation3","Mutation4"}, -- Replace with your mutations
+    Options = ModifierOptions, -- Replace with your mutations
     MultiSelection = true,
     CurrentOption = {},
     Flag = "MutationDropdownFlag",
