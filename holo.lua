@@ -174,6 +174,26 @@ function METHODS.PressR()
     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.R, false, game)
 end
 
+function METHODS.WaitUntilReady()
+    -- wait for player + character
+    repeat task.wait() until player
+    repeat task.wait() until player.Character
+    repeat task.wait() until player.Character:FindFirstChild("HumanoidRootPart")
+
+    -- wait for Knit to fully start
+    local started = false
+
+    Knit.Start():andThen(function()
+        started = true
+    end):catch(function(err)
+        warn("Knit failed:", err)
+    end)
+
+    repeat task.wait() until started
+
+    print("✅ Everything ready")
+end
+
 function METHODS.FindTeleportName(keyword)
     for _, v in pairs(workspace:GetDescendants()) do
         if v:IsA("Model") then
@@ -234,16 +254,18 @@ FarmTab:CreateDropdown({
     CurrentOption = CONFIG.PositionOption or "Position 1",
     Callback = function(option)
         local selected = typeof(option) == "table" and option[1] or option
-        SelectedName = selected
-        STATE.SelectedPos = POSITIONS[selected]
     
         if selected == "Position 2" then
             task.spawn(function()
                 local name = METHODS.FindTeleportName("easter") or "Easter"
+                print(name)
     
                 METHODS.TeleportSmart(name)
             end)
         end
+
+        SelectedName = selected
+        STATE.SelectedPos = POSITIONS[selected]
     end
 })
 
