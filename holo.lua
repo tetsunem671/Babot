@@ -21,10 +21,11 @@ local POSITIONS = {
     ["Position 2"] = Vector3.new(-2199.80, 719.17, 2377.03)
 }
 
+local SelectedName = CONFIG.PositionOption or "Position 1"
 
 local STATE = {
     Enabled = CONFIG.Default or false,
-    SelectedPos = POSITIONS[CONFIG.PositionOption or "Position 1"],
+    SelectedPos = POSITIONS[SelectedName],
     CurrentTween = nil,
 
     HopEnabled = CONFIG.Serverhop and CONFIG.Serverhop.Enabled or false,
@@ -114,7 +115,7 @@ function METHODS.TweenTo(position)
     end
 
     local distance = (hrp.Position - position).Magnitude
-    local speed = 100
+    local speed = 80
 
     local tween = TweenService:Create(
         hrp,
@@ -194,6 +195,7 @@ FarmTab:CreateDropdown({
     CurrentOption = CONFIG.PositionOption or "Position 1",
     Callback = function(option)
         local selected = typeof(option) == "table" and option[1] or option
+        SelectedName = selected
         STATE.SelectedPos = POSITIONS[selected]
     end
 })
@@ -333,8 +335,12 @@ task.spawn(function()
         local humanoid = METHODS.GetHumanoid()
         if not hrp or not humanoid then continue end
 
-        if (hrp.Position - STATE.SelectedPos).Magnitude > 120 then
-            METHODS.TweenTo(STATE.SelectedPos)
+        if (hrp.Position - STATE.SelectedPos).Magnitude > 100 then
+            if SelectedName == "Position 2" then
+                METHODS.TweenTo(Vector3.new(242.3540496826172, 401.792236328125, 256.85858154296875))
+            else
+                METHODS.TweenTo(STATE.SelectedPos)
+            end
             continue
         end
 
