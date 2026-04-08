@@ -1,3 +1,12 @@
+--// Services
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+--// Modules
+local SharedEggs = require(ReplicatedStorage.Modules.Gameplay.Shared_Eggs)
+local SharedModifiers = require(ReplicatedStorage.Modules.Gameplay.Shared_Modifiers)
+
 local CONFIG = getgenv().CONFIG or {}
 
 local STATE = {
@@ -9,6 +18,13 @@ local STATE = {
 
     SelectedMutations = CONFIG.MutationCurrentOptions or {},
     AllMutations = CONFIG.AllMutations
+    -- Events
+    AutoEaster = CONFIG.AutoEaster or false,
+    AutoGhost = CONFIG.AutoGhost or false,
+    AutoArcade = CONFIG.AutoArcade or false,
+    AutoMeteoron = CONFIG.AutoMeteoron or false,
+    AutoSnowflake = CONFIG.AutoSnowflake or false
+    
     Init = function()
         --// Extract Eggs
         local function extractEggKeys(tbl, result)
