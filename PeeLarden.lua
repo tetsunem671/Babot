@@ -3,11 +3,6 @@
 --// CONFIG LOAD
 local CONFIG = getgenv().CONFIG or {}
 
-CONFIG.EggCurrentOptions = CONFIG.EggCurrentOptions or {}
-CONFIG.MutationCurrentOptions = CONFIG.MutationCurrentOptions or {}
-
-getgenv().CONFIG = CONFIG
-
 --// Services
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -22,9 +17,9 @@ local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 --// STATE
 local STATE = {
-    AutoBuy = false,
-    SelectedEggs = CONFIG.EggCurrentOptions,
-    SelectedMutations = CONFIG.MutationCurrentOptions
+    AutoBuy = CONFIG.AutoBuyEgg or false,
+    SelectedEggs = CONFIG.EggCurrentOptions or {},
+    SelectedMutations = CONFIG.MutationCurrentOptions or {}
 }
 
 --// Workspace
