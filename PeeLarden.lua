@@ -1,66 +1,43 @@
 --!strict
--- Services
+
+--// CONFIG LOAD
+local CONFIG = getgenv().CONFIG or {}
+
+CONFIG.EggCurrentOptions = CONFIG.EggCurrentOptions or {}
+CONFIG.MutationCurrentOptions = CONFIG.MutationCurrentOptions or {}
+
+getgenv().CONFIG = CONFIG
+
+--// Services
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
-print("69")
--- Events & Modules
-local PurchaseEvent = ReplicatedStorage:WaitForChild("Events"):WaitForChild("PurchaseConveyorEgg")
+
+--// Modules
 local SharedEggs = require(ReplicatedStorage.Modules.Gameplay.Shared_Eggs)
 local SharedModifiers = require(ReplicatedStorage.Modules.Gameplay.Shared_Modifiers)
 
--- Rayfield UI (fixed 404)
+--// Rayfield
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
--- State
+--// STATE
 local STATE = {
     AutoBuy = false,
-    SelectedEggs = {},
-    SelectedMutations = {}
+    SelectedEggs = CONFIG.EggCurrentOptions,
+    SelectedMutations = CONFIG.MutationCurrentOptions
 }
 
--- Wait for Plots folder
+--// Workspace
 local PlotsFolder = workspace:WaitForChild("Core"):WaitForChild("Scriptable"):WaitForChild("Plots")
 
--- Create Window
-local Window = Rayfield:CreateWindow({
-    Name = "Egg Auto-Buyer",
-    LoadingTitle = "Initializing...",
-    LoadingSubtitle = "Rayfield UI",
-    ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "EggAutoBuyer",
-        FileName = "Config"
-    },
-    Discord = { Enabled = false },
-    KeySystem = false
-})
-
--- Create a Tab
-local MainTab = Window:CreateTab("Main", 4483362458)
-local AutoTab = Window:CreateTab("Auto", 4483362458)
-
--- Auto-Buy Toggle
-local AutoBuyToggle = AutoTab:CreateToggle({
-    Name = "Enable Auto-Buy",
-    CurrentValue = false,
-    Flag = "AutoBuyFlag",
-    Callback = function(value)
-        STATE.AutoBuy = value
-    end
-})
-
--- Recursively extract all egg keys (exact names used in Workspace)
+--// Extract Eggs
 local function extractEggKeys(tbl, result)
     result = result or {}
     for key, value in pairs(tbl) do
         if type(value) == "table" then
-            -- if table has AssetName, we consider this a leaf egg table
             if value.AssetName then
-                table.insert(result, key) -- use the exact key instead of AssetName
+                table.insert(result, key)
             end
-            -- recurse deeper in case of nested tables
             extractEggKeys(value, result)
         end
     end
@@ -69,112 +46,132 @@ end
 
 local eggOptions = extractEggKeys(SharedEggs)
 
-local EggDropdown = AutoTab:CreateDropdown({
-    Name = "Select Eggs",
-    Options = eggOptions,
-    MultipleOptions = true,
-    CurrentOption = {},
-    Flag = "EggDropdownFlag",
-    Callback = function(selected)
-        STATE.SelectedEggs = selected
-    end
-})
-
-local SearchBox = AutoTab:CreateInput({
-    Name = "Search Eggs",
-    PlaceholderText = "Type egg name...",
-    Flag = "SearchEggFlag",
-    Callback = function(text)
-        -- Always ensure text is a string
-        text = tostring(text or "")
-
-        local filtered = {}
-        for _, egg in ipairs(eggOptions) do
-            if egg:lower():find(text:lower()) then
-                table.insert(filtered, egg)
-            end
-        end
-
-        -- If nothing matches, just show an empty table to avoid errors
-        EggDropdown:Refresh(filtered or {})
-    end
-})
-
-
-AutoTab:CreateButton({
-    Name = "Select All Eggs",
-    Flag = "SelectAllEggsFlag",
-        
-    Callback = function()
-        STATE.SelectedEggs = eggOptions
-        EggDropdown:Set(eggOptions) -- selects all eggs
-    end
-})
-
-AutoTab:CreateButton({
-    Name = "Clear Eggs",
-    Flag = "ClearEggsFlag",
-    Callback = function()
-        STATE.SelectedEggs = {}
-        EggDropdown:Set({}) -- clears all selections
-    end
-})
-
+--// Extract Mutations
 local ModifierOptions = {}
 for key, _ in pairs(SharedModifiers.Modifiers) do
     table.insert(ModifierOptions, key)
 end
 
--- Mutation Multi-Select Dropdown
-local MutationDropdown = AutoTab:CreateDropdown({
-    Name = "Select Mutations",
-    Options = ModifierOptions, -- Replace with your mutations
-    MultipleOptions = true,
-    CurrentOption = {},
-    Flag = "MutationDropdownFlag",
-    Callback = function(selected)
-        STATE.SelectedMutations = selected
+--// VALIDATE CONFIG (prevents errors)
+local function filterValid(list, validOptions)
+    local valid = {}
+    for _, v in ipairs(list) do
+        if table.find(validOptions, v) then
+            table.insert(valid, v)
+        end
+    end
+    return valid
+end
+
+CONFIG.EggCurrentOptions = filterValid(CONFIG.EggCurrentOptions, eggOptions)
+CONFIG.MutationCurrentOptions = filterValid(CONFIG.MutationCurrentOptions, ModifierOptions)
+
+STATE.SelectedEggs = CONFIG.EggCurrentOptions
+STATE.SelectedMutations = CONFIG.MutationCurrentOptions
+
+--// UI
+local Window = Rayfield:CreateWindow({
+    Name = "Egg Auto-Buyer",
+    LoadingTitle = "Initializing...",
+    LoadingSubtitle = "Rayfield UI",
+    ConfigurationSaving = { Enabled = false },
+    KeySystem = false
+})
+
+local AutoTab = Window:CreateTab("Auto", 4483362458)
+
+-- Toggle
+AutoTab:CreateToggle({
+    Name = "Enable Auto-Buy",
+    CurrentValue = false,
+    Callback = function(v)
+        STATE.AutoBuy = v
     end
 })
 
-local SearchMutations = AutoTab:CreateInput({
-    Name = "Search Mutations",
-    PlaceholderText = "Type Mutation name...",
-    Flag = "SearchMutationFlag",
-    Callback = function(text)
-        text = tostring(text or "")
-        local filtered = {}
-        for _, mutation in ipairs(ModifierOptions) do
-            if mutation:lower():find(text:lower()) then
-                table.insert(filtered, mutation)
-            end
-        end
-        MutationDropdown:Refresh(filtered or {})
+-- Egg Dropdown
+local EggDropdown = AutoTab:CreateDropdown({
+    Name = "Select Eggs",
+    Options = eggOptions,
+    MultipleOptions = true,
+    CurrentOption = STATE.SelectedEggs,
+    Callback = function(selected)
+        STATE.SelectedEggs = selected
+        CONFIG.EggCurrentOptions = selected
+    end
+})
+
+-- Mutation Dropdown
+local MutationDropdown = AutoTab:CreateDropdown({
+    Name = "Select Mutations",
+    Options = ModifierOptions,
+    MultipleOptions = true,
+    CurrentOption = STATE.SelectedMutations,
+    Callback = function(selected)
+        STATE.SelectedMutations = selected
+        CONFIG.MutationCurrentOptions = selected
+    end
+})
+
+-- Apply config visually
+task.defer(function()
+    EggDropdown:Set(CONFIG.EggCurrentOptions)
+    MutationDropdown:Set(CONFIG.MutationCurrentOptions)
+end)
+
+-- Buttons
+AutoTab:CreateButton({
+    Name = "Select All Eggs",
+    Callback = function()
+        STATE.SelectedEggs = eggOptions
+        CONFIG.EggCurrentOptions = eggOptions
+        EggDropdown:Set(eggOptions)
+    end
+})
+
+AutoTab:CreateButton({
+    Name = "Clear Eggs",
+    Callback = function()
+        STATE.SelectedEggs = {}
+        CONFIG.EggCurrentOptions = {}
+        EggDropdown:Set({})
     end
 })
 
 AutoTab:CreateButton({
     Name = "Select All Mutations",
-    Flag = "SelectAllMutationsFlag",
     Callback = function()
         STATE.SelectedMutations = ModifierOptions
+        CONFIG.MutationCurrentOptions = ModifierOptions
         MutationDropdown:Set(ModifierOptions)
     end
 })
 
 AutoTab:CreateButton({
     Name = "Clear Mutations",
-    Flag = "CleanAllMutationsFlag",
     Callback = function()
         STATE.SelectedMutations = {}
+        CONFIG.MutationCurrentOptions = {}
         MutationDropdown:Set({})
     end
 })
 
+--// DEBUG: PRINT ALL OPTIONS (THIS IS WHAT YOU WANTED)
+print("=== ALL EGGS ===")
+for _, v in ipairs(eggOptions) do
+    print(v)
+end
+
+print("=== ALL MUTATIONS ===")
+for _, v in ipairs(ModifierOptions) do
+    print(v)
+end
+
+--// LOOP
 task.spawn(function()
     while true do
         task.wait(0.2)
-        if not STATE.AutoBuy then continue end  -- just skip this tick, don’t exit the loop
+        if not STATE.AutoBuy then continue end
 
         for _, plot in pairs(PlotsFolder:GetChildren()) do
             if plot:FindFirstChild("Conveyor") and plot:FindFirstChild("Eggs") then
@@ -203,18 +200,16 @@ task.spawn(function()
 
                     if canBuy then
                         local prompt = egg:FindFirstChildWhichIsA("ProximityPrompt")
-                        if prompt then
-                            -- only trigger if not already bought / in progress
-                            if not prompt:GetAttribute("TriggeredByScript") then
-                                prompt:SetAttribute("TriggeredByScript", true)
-                                task.spawn(function()
-                                    prompt:InputHoldBegin()
-                                    task.wait(0.5)
-                                    prompt:InputHoldEnd()
-                                    task.wait(0.1)
-                                    prompt:SetAttribute("TriggeredByScript", false)
-                                end)
-                            end
+                        if prompt and not prompt:GetAttribute("TriggeredByScript") then
+                            prompt:SetAttribute("TriggeredByScript", true)
+
+                            task.spawn(function()
+                                prompt:InputHoldBegin()
+                                task.wait(0.5)
+                                prompt:InputHoldEnd()
+                                task.wait(0.1)
+                                prompt:SetAttribute("TriggeredByScript", false)
+                            end)
                         end
                     end
                 end
