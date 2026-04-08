@@ -1,5 +1,7 @@
 local UI = {
   Init = function()
+      local STATE = getgenv().STATE
+    
       --// Rayfield
       local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
       
@@ -22,17 +24,17 @@ local UI = {
       -- Toggles
       EggsTab:CreateToggle({
           Name = "Auto Buy (With Mutation)",
-          CurrentValue = getgenv().STATE.AutoBuyMutation,
+          CurrentValue = STATE.AutoBuyMutation,
           Callback = function(v)
-              getgenv().STATE.AutoBuyMutation = v
+              STATE.AutoBuyMutation = v
           end
       })
       
       EggsTab:CreateToggle({
           Name = "Auto Buy (No Mutation)",
-          CurrentValue = getgenv().STATE.AutoBuyNoMutation,
+          CurrentValue = STATE.AutoBuyNoMutation,
           Callback = function(v)
-              getgenv().STATE.AutoBuyNoMutation = v
+              STATE.AutoBuyNoMutation = v
           end
       })
       
@@ -41,9 +43,9 @@ local UI = {
           Name = "Select Eggs (With Mutation)",
           Options = getgenv().eggOptions,
           MultipleOptions = true,
-          CurrentOption = getgenv().STATE.SelectedEggsWithMutation,
+          CurrentOption = STATE.SelectedEggsWithMutation,
           Callback = function(selected)
-              getgenv().STATE.SelectedEggsWithMutation = selected
+              STATE.SelectedEggsWithMutation = selected
           end
       })
       
@@ -51,9 +53,9 @@ local UI = {
           Name = "Select Eggs (No Mutation)",
           Options = getgenv().eggOptions,
           MultipleOptions = true,
-          CurrentOption = getgenv().STATE.SelectedEggsNoMutation,
+          CurrentOption = STATE.SelectedEggsNoMutation,
           Callback = function(selected)
-              getgenv().STATE.SelectedEggsNoMutation = selected
+              STATE.SelectedEggsNoMutation = selected
           end
       })
       
@@ -62,17 +64,17 @@ local UI = {
           Name = "Select Mutations",
           Options = getgenv().ModifierOptions,
           MultipleOptions = true,
-          CurrentOption = getgenv().STATE.SelectedMutations,
+          CurrentOption = STATE.SelectedMutations,
           Callback = function(selected)
-              getgenv().STATE.SelectedMutations = selected
+              STATE.SelectedMutations = selected
           end
       })
       
       -- Apply config visually
       task.defer(function()
-          EggDropdownWithMutation:Set(getgenv().STATE.SelectedEggsWithMutation)
-          EggDropdownNoMutation:Set(getgenv().STATE.SelectedEggsNoMutation)
-          MutationDropdown:Set(getgenv().STATE.SelectedMutations)
+          EggDropdownWithMutation:Set(STATE.SelectedEggsWithMutation)
+          EggDropdownNoMutation:Set(STATE.SelectedEggsNoMutation)
+          MutationDropdown:Set(STATE.SelectedMutations)
       end)
 
       -- Buttons
@@ -130,41 +132,41 @@ local UI = {
       -- Toggles
       EventsTab:CreateToggle({
           Name = "Auto Easter",
-          CurrentValue = getgenv().STATE.AutoEaster,
+          CurrentValue = STATE.AutoEaster,
           Callback = function(v)
-              getgenv().STATE.AutoEaster = v
+              STATE.AutoEaster = v
           end
       })
 
       EventsTab:CreateToggle({
           Name = "Auto Ghost",
-          CurrentValue = getgenv().STATE.AutoGhost,
+          CurrentValue = STATE.AutoGhost,
           Callback = function(v)
-              getgenv().STATE.AutoGhost = v
+              STATE.AutoGhost = v
           end
       })
 
       EventsTab:CreateToggle({
           Name = "Auto Arcade",
-          CurrentValue = getgenv().STATE.AutoArcade,
+          CurrentValue = STATE.AutoArcade,
           Callback = function(v)
-              getgenv().STATE.AutoArcade = v
+              STATE.AutoArcade = v
           end
       })
 
       EventsTab:CreateToggle({
           Name = "Auto Meteoron Pick",
-          CurrentValue = getgenv().STATE.AutoMeteoron,
+          CurrentValue = STATE.AutoMeteoron,
           Callback = function(v)
-              getgenv().STATE.AutoMeteoron = v
+              STATE.AutoMeteoron = v
           end
       })
 
       EventsTab:CreateToggle({
           Name = "Auto Snowflake Pick",
-          CurrentValue = getgenv().STATE.AutoSnowflake,
+          CurrentValue = STATE.AutoSnowflake,
           Callback = function(v)
-              getgenv().STATE.AutoSnowflake = v
+              STATE.AutoSnowflake = v
           end
       })
   end)
