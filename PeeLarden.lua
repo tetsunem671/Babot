@@ -22,6 +22,7 @@ local STATE = {
 
     SelectedEggs = CONFIG.EggCurrentOptions or {},
     SelectedMutations = CONFIG.MutationCurrentOptions or {}
+    AllMutations = CONFIG.AllMutations
 }
 
 --// Workspace
@@ -61,7 +62,12 @@ local function filterValid(list, validOptions)
 end
 
 CONFIG.EggCurrentOptions = filterValid(CONFIG.EggCurrentOptions, eggOptions)
-CONFIG.MutationCurrentOptions = filterValid(CONFIG.MutationCurrentOptions, ModifierOptions)
+
+if STATE.AllMutations then
+    CONFIG.MutationCurrentOptions = ModifierOptions
+else
+    CONFIG.MutationCurrentOptions = filterValid(CONFIG.MutationCurrentOptions, ModifierOptions)
+end
 
 STATE.SelectedEggs = CONFIG.EggCurrentOptions
 STATE.SelectedMutations = CONFIG.MutationCurrentOptions
@@ -83,7 +89,6 @@ AutoTab:CreateToggle({
     CurrentValue = STATE.AutoBuyMutation,
     Callback = function(v)
         STATE.AutoBuyMutation = v
-        CONFIG.AutoBuyMutation = v
     end
 })
 
@@ -92,7 +97,6 @@ AutoTab:CreateToggle({
     CurrentValue = STATE.AutoBuyNoMutation,
     Callback = function(v)
         STATE.AutoBuyNoMutation = v
-        CONFIG.AutoBuyNoMutation = v
     end
 })
 
@@ -104,7 +108,6 @@ local EggDropdown = AutoTab:CreateDropdown({
     CurrentOption = STATE.SelectedEggs,
     Callback = function(selected)
         STATE.SelectedEggs = selected
-        CONFIG.EggCurrentOptions = selected
     end
 })
 
@@ -116,7 +119,6 @@ local MutationDropdown = AutoTab:CreateDropdown({
     CurrentOption = STATE.SelectedMutations,
     Callback = function(selected)
         STATE.SelectedMutations = selected
-        CONFIG.MutationCurrentOptions = selected
     end
 })
 
@@ -131,7 +133,6 @@ AutoTab:CreateButton({
     Name = "Select All Eggs",
     Callback = function()
         STATE.SelectedEggs = eggOptions
-        CONFIG.EggCurrentOptions = eggOptions
         EggDropdown:Set(eggOptions)
     end
 })
@@ -140,7 +141,6 @@ AutoTab:CreateButton({
     Name = "Clear Eggs",
     Callback = function()
         STATE.SelectedEggs = {}
-        CONFIG.EggCurrentOptions = {}
         EggDropdown:Set({})
     end
 })
@@ -149,7 +149,6 @@ AutoTab:CreateButton({
     Name = "Select All Mutations",
     Callback = function()
         STATE.SelectedMutations = ModifierOptions
-        CONFIG.MutationCurrentOptions = ModifierOptions
         MutationDropdown:Set(ModifierOptions)
     end
 })
@@ -158,7 +157,6 @@ AutoTab:CreateButton({
     Name = "Clear Mutations",
     Callback = function()
         STATE.SelectedMutations = {}
-        CONFIG.MutationCurrentOptions = {}
         MutationDropdown:Set({})
     end
 })
