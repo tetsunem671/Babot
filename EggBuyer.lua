@@ -1,3 +1,14 @@
+--// Services
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+--// Modules
+local SharedEggs = require(ReplicatedStorage.Modules.Gameplay.Shared_Eggs)
+local SharedModifiers = require(ReplicatedStorage.Modules.Gameplay.Shared_Modifiers)
+
+--// Workspace
+local PlotsFolder = workspace:WaitForChild("Core"):WaitForChild("Scriptable"):WaitForChild("Plots")
 
 --// HELPER FUNCTIONS
 local function hasSelectedMutation(eggModifiers)
