@@ -20,8 +20,10 @@ local STATE = {
     AutoBuyMutation = CONFIG.AutoBuyMutation or false,
     AutoBuyNoMutation = CONFIG.AutoBuyNoMutation or false,
 
-    SelectedEggs = CONFIG.EggCurrentOptions or {},
-    SelectedMutations = CONFIG.MutationCurrentOptions or {}
+    SelectedEggsWithMutation = CONFIG.EggCurrentOptions_WithMutation or {},
+    SelectedEggsNoMutation = CONFIG.EggCurrentOptions_NoMutation or {},
+
+    SelectedMutations = CONFIG.MutationCurrentOptions or {},
     AllMutations = CONFIG.AllMutations
 }
 
@@ -61,15 +63,17 @@ local function filterValid(list, validOptions)
     return valid
 end
 
-CONFIG.EggCurrentOptions = filterValid(CONFIG.EggCurrentOptions, eggOptions)
+CONFIG.EggCurrentOptions_WithMutation = filterValid(CONFIG.EggCurrentOptions_WithMutation or {}, eggOptions)
+CONFIG.EggCurrentOptions_NoMutation = filterValid(CONFIG.EggCurrentOptions_NoMutation or {}, eggOptions)
 
 if STATE.AllMutations then
     CONFIG.MutationCurrentOptions = ModifierOptions
 else
-    CONFIG.MutationCurrentOptions = filterValid(CONFIG.MutationCurrentOptions, ModifierOptions)
+    CONFIG.MutationCurrentOptions = filterValid(CONFIG.MutationCurrentOptions or {}, ModifierOptions)
 end
 
-STATE.SelectedEggs = CONFIG.EggCurrentOptions
+STATE.SelectedEggsWithMutation = CONFIG.EggCurrentOptions_WithMutation
+STATE.SelectedEggsNoMutation = CONFIG.EggCurrentOptions_NoMutation
 STATE.SelectedMutations = CONFIG.MutationCurrentOptions
 
 --// UI
@@ -100,14 +104,24 @@ AutoTab:CreateToggle({
     end
 })
 
--- Egg Dropdown
-local EggDropdown = AutoTab:CreateDropdown({
-    Name = "Select Eggs",
+-- Egg Dropdowns
+local EggDropdownWithMutation = AutoTab:CreateDropdown({
+    Name = "Select Eggs (With Mutation)",
     Options = eggOptions,
     MultipleOptions = true,
-    CurrentOption = STATE.SelectedEggs,
+    CurrentOption = STATE.SelectedEggsWithMutation,
     Callback = function(selected)
-        STATE.SelectedEggs = selected
+        STATE.SelectedEggsWithMutation = selected
+    end
+})
+
+local EggDropdownNoMutation = AutoTab:CreateDropdown({
+    Name = "Select Eggs (No Mutation)",
+    Options = eggOptions,
+    MultipleOptions = true,
+    CurrentOption = STATE.SelectedEggsNoMutation,
+    Callback = function(selected)
+        STATE.SelectedEggsNoMutation = selected
     end
 })
 
@@ -124,27 +138,47 @@ local MutationDropdown = AutoTab:CreateDropdown({
 
 -- Apply config visually
 task.defer(function()
-    EggDropdown:Set(STATE.SelectedEggs)
+    EggDropdownWithMutation:Set(STATE.SelectedEggsWithMutation)
+    EggDropdownNoMutation:Set(STATE.SelectedEggsNoMutation)
     MutationDropdown:Set(STATE.SelectedMutations)
 end)
 
 -- Buttons
+-- Eggs With Mutation
 AutoTab:CreateButton({
-    Name = "Select All Eggs",
+    Name = "Select All Eggs (With Mutation)",
     Callback = function()
-        STATE.SelectedEggs = eggOptions
-        EggDropdown:Set(eggOptions)
+        STATE.SelectedEggsWithMutation = eggOptions
+        EggDropdownWithMutation:Set(eggOptions)
     end
 })
 
 AutoTab:CreateButton({
-    Name = "Clear Eggs",
+    Name = "Clear Eggs (With Mutation)",
     Callback = function()
-        STATE.SelectedEggs = {}
-        EggDropdown:Set({})
+        STATE.SelectedEggsWithMutation = {}
+        EggDropdownWithMutation:Set({})
     end
 })
 
+-- Eggs No Mutation
+AutoTab:CreateButton({
+    Name = "Select All Eggs (No Mutation)",
+    Callback = function()
+        STATE.SelectedEggsNoMutation = eggOptions
+        EggDropdownNoMutation:Set(eggOptions)
+    end
+})
+
+AutoTab:CreateButton({
+    Name = "Clear Eggs (No Mutation)",
+    Callback = function()
+        STATE.SelectedEggsNoMutation = {}
+        EggDropdownNoMutation:Set({})
+    end
+})
+
+-- Mutations
 AutoTab:CreateButton({
     Name = "Select All Mutations",
     Callback = function()
@@ -191,16 +225,18 @@ task.spawn(function()
                     local eggModifiers = egg:GetAttribute("modifiers")
                     local canBuy = false
 
-                    if table.find(STATE.SelectedEggs, eggName) then
-                        -- WITH MUTATION
-                        if STATE.AutoBuyMutation and hasSelectedMutation(eggModifiers) then
-                            canBuy = true
-                        end
+                    -- WITH MUTATION
+                    if STATE.AutoBuyMutation 
+                    and table.find(STATE.SelectedEggsWithMutation, eggName)
+                    and hasSelectedMutation(eggModifiers) then
+                        canBuy = true
+                    end
 
-                        -- NO MUTATION
-                        if STATE.AutoBuyNoMutation and isNoMutation(eggModifiers) then
-                            canBuy = true
-                        end
+                    -- NO MUTATION
+                    if STATE.AutoBuyNoMutation 
+                    and table.find(STATE.SelectedEggsNoMutation, eggName)
+                    and isNoMutation(eggModifiers) then
+                        canBuy = true
                     end
 
                     if canBuy then
