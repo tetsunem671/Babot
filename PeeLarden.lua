@@ -17,7 +17,9 @@ local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 --// STATE
 local STATE = {
-    AutoBuy = CONFIG.AutoBuyEgg or false,
+    AutoBuyMutation = CONFIG.AutoBuyMutation or false,
+    AutoBuyNoMutation = CONFIG.AutoBuyNoMutation or false,
+
     SelectedEggs = CONFIG.EggCurrentOptions or {},
     SelectedMutations = CONFIG.MutationCurrentOptions or {}
 }
@@ -75,12 +77,22 @@ local Window = Rayfield:CreateWindow({
 
 local AutoTab = Window:CreateTab("Auto", 4483362458)
 
--- Toggle
+-- Toggles
 AutoTab:CreateToggle({
-    Name = "Enable Auto-Buy",
-    CurrentValue = false,
+    Name = "Auto Buy (With Mutation)",
+    CurrentValue = STATE.AutoBuyMutation,
     Callback = function(v)
-        STATE.AutoBuy = v
+        STATE.AutoBuyMutation = v
+        CONFIG.AutoBuyMutation = v
+    end
+})
+
+AutoTab:CreateToggle({
+    Name = "Auto Buy (No Mutation)",
+    CurrentValue = STATE.AutoBuyNoMutation,
+    Callback = function(v)
+        STATE.AutoBuyNoMutation = v
+        CONFIG.AutoBuyNoMutation = v
     end
 })
 
@@ -110,8 +122,8 @@ local MutationDropdown = AutoTab:CreateDropdown({
 
 -- Apply config visually
 task.defer(function()
-    EggDropdown:Set(CONFIG.EggCurrentOptions)
-    MutationDropdown:Set(CONFIG.MutationCurrentOptions)
+    EggDropdown:Set(STATE.SelectedEggs)
+    MutationDropdown:Set(STATE.SelectedMutations)
 end)
 
 -- Buttons
@@ -151,22 +163,28 @@ AutoTab:CreateButton({
     end
 })
 
---// DEBUG: PRINT ALL OPTIONS (THIS IS WHAT YOU WANTED)
-print("=== ALL EGGS ===")
-for _, v in ipairs(eggOptions) do
-    print(v)
+--// HELPER FUNCTIONS
+local function hasSelectedMutation(eggModifiers)
+    if typeof(eggModifiers) ~= "string" or eggModifiers == "" then
+        return false
+    end
+    for mut in eggModifiers:gmatch("([^,]+)") do
+        mut = mut:match("^%s*(.-)%s*$")
+        if table.find(STATE.SelectedMutations, mut) then
+            return true
+        end
+    end
+    return false
 end
 
-print("=== ALL MUTATIONS ===")
-for _, v in ipairs(ModifierOptions) do
-    print(v)
+local function isNoMutation(eggModifiers)
+    return typeof(eggModifiers) ~= "string" or eggModifiers == ""
 end
 
 --// LOOP
 task.spawn(function()
     while true do
         task.wait(0.2)
-        if not STATE.AutoBuy then continue end
 
         for _, plot in pairs(PlotsFolder:GetChildren()) do
             if plot:FindFirstChild("Conveyor") and plot:FindFirstChild("Eggs") then
@@ -176,19 +194,13 @@ task.spawn(function()
                     local canBuy = false
 
                     if table.find(STATE.SelectedEggs, eggName) then
-                        if #STATE.SelectedMutations > 0 then
-                            if typeof(eggModifiers) == "string" and eggModifiers ~= "" then
-                                for mut in eggModifiers:gmatch("([^,]+)") do
-                                    mut = mut:match("^%s*(.-)%s*$")
-                                    if table.find(STATE.SelectedMutations, mut) then
-                                        canBuy = true
-                                        break
-                                    end
-                                end
-                            else
-                                canBuy = true
-                            end
-                        else
+                        -- WITH MUTATION
+                        if STATE.AutoBuyMutation and hasSelectedMutation(eggModifiers) then
+                            canBuy = true
+                        end
+
+                        -- NO MUTATION
+                        if STATE.AutoBuyNoMutation and isNoMutation(eggModifiers) then
                             canBuy = true
                         end
                     end
