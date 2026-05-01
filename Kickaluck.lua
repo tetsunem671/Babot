@@ -340,15 +340,6 @@ task.spawn(function()
     end
 end)
 
-task.spawn(function()
-    while Controller.Running do
-        if AUTO_GIFT then
-            updateUI()
-        end
-        task.wait(0.5)
-    end
-end)
-
 LoadConfig()
 
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
@@ -497,3 +488,13 @@ task.spawn(function()
         SaveConfig()
     end
 end)
+
+task.spawn(function()
+    while Controller.Running do
+        if AUTO_GIFT then
+            updateUI()
+        end
+        task.wait(0.5)
+    end
+end)
+
