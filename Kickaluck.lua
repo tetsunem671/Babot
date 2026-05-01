@@ -34,6 +34,7 @@ local UPG_DELAY = 0.08
 local LOOP_DELAY = 0.08
 local GIFT_DELAY = 0.25
 
+local AUTO_FARM = false
 local AUTO_GIFT = false
 local TARGET_NAME = ""
 
@@ -56,10 +57,17 @@ local Plots = workspace.Plots
 local Plot
 for _, plot in pairs(Plots:GetChildren()) do
     local text = plot.Decorations.PlotOwner.OwnerGUI.TextLabel.Text
-    if text = player.Name or text == player.DisplayName then
+    if text == player.Name or text == player.DisplayName then
         Plot = plot
+        break
     end
 end
+
+if not Plot then
+    warn("Plot not found")
+    return
+end
+
 local Slots = Plot.Slots
 
 local ignore_Name = {"Dragon Cannelloni", "Spaghetti Tualetti", "Esok Sekolah"}
@@ -283,9 +291,11 @@ local function getTarget()
     end
 end
 
-Network.OnClientEvent("SendGift"):Connect(function()
-    fire("SendGift", true)
-end)
+if Network.OnClientEvent then
+    Network.OnClientEvent("SendGift"):Connect(function()
+        fire("SendGift", true)
+    end)
+end
 
 --==================================================
 -- AUTO GIFT LOOP
@@ -306,7 +316,7 @@ task.spawn(function()
             continue
         end
 
-        if traded >= TRADE_LIMIT then task.wait(0.5) continue end
+        if tradedCount >= TRADE_LIMIT then task.wait(0.5) continue end
 
         for _,tool in ipairs(player.Backpack:GetChildren()) do
             if not AUTO_GIFT then
@@ -429,8 +439,6 @@ MainTab:CreateInput({
 -- AUTO FARM TAB
 --==================================================
 local FarmTab = Window:CreateTab("Auto Farm")
-
-local AUTO_FARM = false
 
 FarmTab:CreateToggle({
     Name = "Auto Farm (Place + Upgrade)",
