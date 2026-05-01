@@ -17,7 +17,14 @@ local MIN_SLOT, MAX_SLOT, MAX_LEVEL = 21, 30, 75
 local FARM_THRESH = 1
 local GIFT_MIN = 0
 local GIFT_MAX = 1e10 -- default 10B
+
+local Indicator
+
+
 local TRADE_LIMIT = 3
+local tradedCount = 0
+local lastTraded = "None"
+local startTime = 0
 
 local UPG_DELAY = 0.08
 local LOOP_DELAY = 0.08
@@ -26,7 +33,17 @@ local GIFT_DELAY = 0.25
 local AUTO_GIFT = false
 local TARGET_NAME = ""
 
-local Slots = workspace.Plots.Plot5.Slots
+
+local Plots = workspace.Plots
+
+local Plot
+for _, plot in pairs(Plots:GetChildren()) do
+    local text = plot.Decorations.PlotOwner.OwnerGUI.TextLabel.Text
+    if text = player.Name or text == player.DisplayName then
+        Plot = plot
+    end
+end
+local Slots = Plot.Slots
 
 local ignore_Name = {"Dragon Cannelloni", "Spaghetti Tualetti", "Esok Sekolah"}
 
@@ -64,6 +81,21 @@ local function ue()
     for _,v in ipairs(c:GetChildren()) do
         if v:IsA("Tool") then v.Parent = b end
     end
+end
+
+local function updateUI()
+    local elapsed = startTime > 0 and math.floor(os.clock() - startTime) or 0
+
+    Indicator:Set({
+        Title = "Trade Stats",
+        Content = string.format(
+            "Traded: %d / %d\nLast: %s\nTime: %ds",
+            tradedCount,
+            TRADE_LIMIT,
+            lastTraded,
+            elapsed
+        )
+    })
 end
 
 local function parse(s)
@@ -144,6 +176,10 @@ task.spawn(function()
         task.wait(LOOP_DELAY)
 
         for _,tool in ipairs(player.Backpack:GetChildren()) do
+            if not AUTO_FARM then
+                task.wait(0.5)
+                continue
+            end
             if not Controller.Running then break end
 
             if tool:IsA("Tool") and not table.find(ignore_Name, tool.Name) then
@@ -204,21 +240,29 @@ end)
 --==================================================
 task.spawn(function()
     while Controller.Running do
+        if startTime == 0 then
+            startTime = os.clock()
+        end    
         if not AUTO_GIFT then
             task.wait(0.5)
             continue
         end
 
-        local traded = 0
         local target = getTarget()
         if not target then
             task.wait(1)
             continue
         end
 
+        if traded >= TRADE_LIMIT then task.wait(0.5) continue end
+
         for _,tool in ipairs(player.Backpack:GetChildren()) do
+            if not AUTO_GIFT then
+                task.wait(0.5)
+                break
+            end
             if not Controller.Running then break end
-            if traded >= TRADE_LIMIT then break end
+            if tradedCount >= TRADE_LIMIT then break end
 
             if isGiftable(tool) and not table.find(ignore_Name, tool.Name) then
                 ue()
@@ -233,12 +277,23 @@ task.spawn(function()
                     repeat task.wait(GIFT_DELAY)
                     until tool.Parent ~= player.Character
 
-                    traded += 1
+                    tradedCount += 1
+                    lastTraded = tool.Name
+                    updateUI()
                 end
             end
         end
 
         task.wait(0.2)
+    end
+end)
+
+task.spawn(function()
+    while Controller.Running do
+        if AUTO_GIFT then
+            updateUI()
+        end
+        task.wait(0.5)
     end
 end)
 
@@ -260,9 +315,15 @@ MainTab:CreateToggle({
     CurrentValue = AUTO_GIFT,
     Callback = function(v)
         AUTO_GIFT = v
+
+        if not v then
+            tradedCount = 0
+            lastTraded = "None"
+            startTime = 0
+            updateUI()
+        end
     end
 })
-
 -- MIN
 MainTab:CreateInput({
     Name = "Gift MIN (e.g. 1M)",
@@ -314,16 +375,21 @@ MainTab:CreateInput({
     end
 })
 
+Indicator = MainTab:CreateParagraph({
+    Title = "Trade Stats",
+    Content = "Idle"
+})
+
 --==================================================
 -- AUTO FARM TAB
 --==================================================
 local FarmTab = Window:CreateTab("Auto Farm")
 
-local AUTO_FARM = true
+local AUTO_FARM = false
 
 FarmTab:CreateToggle({
     Name = "Auto Farm (Place + Upgrade)",
-    CurrentValue = true,
+    CurrentValue = AUTO_FARM,
     Callback = function(v)
         AUTO_FARM = v
     end
