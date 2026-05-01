@@ -1,0 +1,353 @@
+--// SERVICES
+local P = game:GetService("Players")
+local R = game:GetService("ReplicatedStorage")
+
+local player = P.LocalPlayer
+local Network = require(R.Shared.Packages.Network)
+
+--// DEPENDENCIES
+local Tags = require(R.Shared.Data.Tags)
+local EntitiesData = require(R.Shared.Data.EntitiesData)
+
+--==================================================
+-- SETTINGS
+--==================================================
+local MIN_SLOT, MAX_SLOT, MAX_LEVEL = 21, 30, 75
+
+local FARM_THRESH = 1
+local GIFT_THRESH = 1
+local TRADE_LIMIT = 3
+
+local UPG_DELAY = 0.08
+local LOOP_DELAY = 0.08
+local GIFT_DELAY = 0.25
+
+local AUTO_GIFT = false
+local TARGET_NAME = ""
+
+local Slots = workspace.Plots.Plot5.Slots
+
+local ignore_Name = {"Dragon Cannelloni", "Spaghetti Tualetti", "Esok Sekolah"}
+
+--==================================================
+-- CONTROLLER
+--==================================================
+local Controller = { Running = true }
+
+--==================================================
+-- STOP BUTTON
+--==================================================
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.Name = "AutoControl"
+gui.ResetOnSpawn = false
+
+local button = Instance.new("TextButton", gui)
+button.Size = UDim2.new(0,160,0,50)
+button.Position = UDim2.new(0,20,0.5,0)
+button.BackgroundColor3 = Color3.fromRGB(200,50,50)
+button.TextColor3 = Color3.new(1,1,1)
+button.Text = "STOP SCRIPT"
+
+button.MouseButton1Click:Connect(function()
+    Controller.Running = false
+    button.Text = "STOPPED"
+    button.BackgroundColor3 = Color3.fromRGB(80,80,80)
+end)
+
+--==================================================
+-- UTILS
+--==================================================
+local function ue()
+    local c,b = player.Character, player.Backpack
+    if not c then return end
+    for _,v in ipairs(c:GetChildren()) do
+        if v:IsA("Tool") then v.Parent = b end
+    end
+end
+
+local function parse(s)
+    if not s then return 0 end
+    s = tostring(s):upper():gsub(",", ""):gsub("%s+", "")
+    local num,suffix = s:match("([%d%.]+)([KMBT]?)")
+    num = tonumber(num)
+    if not num then return 0 end
+
+    local mult = {K=1e3,M=1e6,B=1e9,T=1e12}
+    return num * (mult[suffix] or 1)
+end
+
+local function slot(i)
+    return Slots:FindFirstChild("Slot"..i)
+end
+
+local function fire(a,b)
+    Network.FireServer(a,b)
+end
+
+--==================================================
+-- CPS
+--==================================================
+local function cps()
+    local c = player.Character
+    if not c then return 0 end
+
+    for _,t in ipairs(c:GetChildren()) do
+        if t:IsA("Tool") then
+            local m = t:FindFirstChildWhichIsA("Model")
+            if m then
+                local ok,v = pcall(function()
+                    return m.Root.EntityGUI.Frame.CPSFrame.Label.Text
+                end)
+                if ok and v then return parse(v) end
+            end
+        end
+    end
+    return 0
+end
+
+--==================================================
+-- SLOT / UPGRADE
+--==================================================
+local function getFreeSlot()
+    for i = MIN_SLOT, MAX_SLOT do
+        if slot(i) then return i end
+    end
+end
+
+local function upgradeFully(i)
+    while Controller.Running do
+        local s = slot(i)
+        local placed = s and s:FindFirstChild("PlacedPart")
+
+        if not placed then
+            task.wait(0.05)
+        else
+            local lvl = placed:GetAttribute("Level")
+            if lvl and lvl >= MAX_LEVEL then break end
+
+            fire("B_Upgrade", i)
+            task.wait(UPG_DELAY)
+        end
+    end
+end
+
+--==================================================
+-- AUTO PLACE + UPGRADE LOOP
+--==================================================
+task.spawn(function()
+    while Controller.Running do
+        if not AUTO_FARM then
+            task.wait(0.5)
+            continue
+        end
+        task.wait(LOOP_DELAY)
+
+        for _,tool in ipairs(player.Backpack:GetChildren()) do
+            if not Controller.Running then break end
+
+            if tool:IsA("Tool") and not table.find(ignore_Name, tool.Name) then
+                ue()
+                tool.Parent = player.Character
+                task.wait(0.2)
+
+                local value = cps()
+
+                if value > 0 and value < FARM_THRESH then
+                    local i = getFreeSlot()
+
+                    if i then
+                        fire("S_Interact", i)
+
+                        repeat task.wait() until slot(i)
+                            and slot(i):FindFirstChild("PlacedPart")
+
+                        task.wait(0.1)
+                        upgradeFully(i)
+                    end
+                end
+            end
+        end
+    end
+end)
+
+--==================================================
+-- GIFT SYSTEM
+--==================================================
+local function isGiftable(tool)
+    return tool:IsA("Tool")
+        and tool:HasTag(Tags.EntityTool)
+        and not table.find(EntitiesData.TradeLocked, tool.Name)
+end
+
+local function getTarget()
+    if TARGET_NAME ~= "" then
+        for _,plr in ipairs(P:GetPlayers()) do
+            if string.lower(plr.Name) == string.lower(TARGET_NAME) then
+                return plr
+            end
+        end
+        return nil
+    end
+
+    for _,plr in ipairs(P:GetPlayers()) do
+        if plr ~= player then return plr end
+    end
+end
+
+Network.OnClientEvent("SendGift"):Connect(function()
+    fire("SendGift", true)
+end)
+
+--==================================================
+-- AUTO GIFT LOOP
+--==================================================
+task.spawn(function()
+    while Controller.Running do
+        if not AUTO_GIFT then
+            task.wait(0.5)
+            continue
+        end
+
+        local traded = 0
+        local target = getTarget()
+        if not target then
+            task.wait(1)
+            continue
+        end
+
+        for _,tool in ipairs(player.Backpack:GetChildren()) do
+            if not Controller.Running then break end
+            if traded >= TRADE_LIMIT then break end
+
+            if isGiftable(tool) and not table.find(ignore_Name, tool.Name) then
+                ue()
+                tool.Parent = player.Character
+                task.wait(0.2)
+
+                local value = cps()
+
+                if value > 0 and value < GIFT_THRESH then
+                    fire("GiftRequest", target.UserId)
+
+                    repeat task.wait(GIFT_DELAY)
+                    until tool.Parent ~= player.Character
+
+                    traded += 1
+                end
+            end
+        end
+
+        task.wait(0.2)
+    end
+end)
+
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "Auto Farm + Gift",
+    LoadingTitle = "Initializing",
+    LoadingSubtitle = "Control Panel"
+})
+
+--==================================================
+-- MAIN TAB (GIFT)
+--==================================================
+local MainTab = Window:CreateTab("Auto Gift")
+
+MainTab:CreateToggle({
+    Name = "Auto Gift",
+    CurrentValue = AUTO_GIFT,
+    Callback = function(v)
+        AUTO_GIFT = v
+    end
+})
+
+MainTab:CreateInput({
+    Name = "Gift Threshold (1M / 10B / 1T)",
+    PlaceholderText = "10B",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(txt)
+        local v = parse(txt)
+        if v > 0 then
+            GIFT_THRESH = v
+            print("Gift Threshold:", GIFT_THRESH)
+        end
+    end
+})
+
+MainTab:CreateInput({
+    Name = "Trade Limit",
+    PlaceholderText = tostring(TRADE_LIMIT),
+    RemoveTextAfterFocusLost = false,
+    Callback = function(txt)
+        local n = tonumber(txt)
+        if n and n > 0 then
+            TRADE_LIMIT = math.floor(n)
+            print("Trade Limit:", TRADE_LIMIT)
+        end
+    end
+})
+
+MainTab:CreateInput({
+    Name = "Target Player",
+    PlaceholderText = "username",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(txt)
+        TARGET_NAME = txt
+        print("Target:", TARGET_NAME)
+    end
+})
+
+--==================================================
+-- AUTO FARM TAB
+--==================================================
+local FarmTab = Window:CreateTab("Auto Farm")
+
+local AUTO_FARM = true
+
+FarmTab:CreateToggle({
+    Name = "Auto Farm (Place + Upgrade)",
+    CurrentValue = true,
+    Callback = function(v)
+        AUTO_FARM = v
+    end
+})
+
+FarmTab:CreateInput({
+    Name = "Farm Threshold (1M / 10B / 1T)",
+    PlaceholderText = "10B",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(txt)
+        local v = parse(txt)
+        if v > 0 then
+            FARM_THRESH = v
+            print("Farm Threshold:", FARM_THRESH)
+        end
+    end
+})
+
+FarmTab:CreateInput({
+    Name = "Upgrade Delay",
+    PlaceholderText = tostring(UPG_DELAY),
+    RemoveTextAfterFocusLost = false,
+    Callback = function(txt)
+        local n = tonumber(txt)
+        if n and n > 0 then
+            UPG_DELAY = n
+            print("Upgrade Delay:", UPG_DELAY)
+        end
+    end
+})
+
+FarmTab:CreateInput({
+    Name = "Loop Delay",
+    PlaceholderText = tostring(LOOP_DELAY),
+    RemoveTextAfterFocusLost = false,
+    Callback = function(txt)
+        local n = tonumber(txt)
+        if n and n > 0 then
+            LOOP_DELAY = n
+            print("Loop Delay:", LOOP_DELAY)
+        end
+    end
+})
