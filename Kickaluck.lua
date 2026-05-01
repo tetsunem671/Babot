@@ -211,6 +211,10 @@ end
 
 local function upgradeFully(i)
     while Controller.Running do
+        if not AUTO_FARM then
+            task.wait(0.5)
+            break
+        end
         local s = slot(i)
         local placed = s and s:FindFirstChild("PlacedPart")
 
@@ -240,7 +244,7 @@ task.spawn(function()
         for _,tool in ipairs(player.Backpack:GetChildren()) do
             if not AUTO_FARM then
                 task.wait(0.5)
-                continue
+                break
             end
             if not Controller.Running then break end
 
