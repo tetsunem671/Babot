@@ -15,7 +15,8 @@ local EntitiesData = require(R.Shared.Data.EntitiesData)
 local MIN_SLOT, MAX_SLOT, MAX_LEVEL = 21, 30, 75
 
 local FARM_THRESH = 1
-local GIFT_THRESH = 1
+local GIFT_MIN = 0
+local GIFT_MAX = 1e10 -- default 10B
 local TRADE_LIMIT = 3
 
 local UPG_DELAY = 0.08
@@ -226,7 +227,7 @@ task.spawn(function()
 
                 local value = cps()
 
-                if value > 0 and value < GIFT_THRESH then
+                if value >= GIFT_MIN and value <= GIFT_MAX then        
                     fire("GiftRequest", target.UserId)
 
                     repeat task.wait(GIFT_DELAY)
@@ -262,15 +263,30 @@ MainTab:CreateToggle({
     end
 })
 
+-- MIN
 MainTab:CreateInput({
-    Name = "Gift Threshold (1M / 10B / 1T)",
+    Name = "Gift MIN (e.g. 1M)",
+    PlaceholderText = "0",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(txt)
+        local v = parse(txt)
+        if v >= 0 then
+            GIFT_MIN = v
+            print("Gift MIN:", GIFT_MIN)
+        end
+    end
+})
+
+-- MAX
+MainTab:CreateInput({
+    Name = "Gift MAX (e.g. 10B / 1T)",
     PlaceholderText = "10B",
     RemoveTextAfterFocusLost = false,
     Callback = function(txt)
         local v = parse(txt)
         if v > 0 then
-            GIFT_THRESH = v
-            print("Gift Threshold:", GIFT_THRESH)
+            GIFT_MAX = v
+            print("Gift MAX:", GIFT_MAX)
         end
     end
 })
