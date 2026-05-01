@@ -5,6 +5,10 @@ local R = game:GetService("ReplicatedStorage")
 local player = P.LocalPlayer
 local Network = require(R.Shared.Packages.Network)
 
+local HttpService = game:GetService("HttpService")
+
+local CONFIG_FILE = "auto_farm_config.json"
+
 --// DEPENDENCIES
 local Tags = require(R.Shared.Data.Tags)
 local EntitiesData = require(R.Shared.Data.EntitiesData)
@@ -14,12 +18,12 @@ local EntitiesData = require(R.Shared.Data.EntitiesData)
 --==================================================
 local MIN_SLOT, MAX_SLOT, MAX_LEVEL = 21, 30, 75
 
+
 local FARM_THRESH = 1
 local GIFT_MIN = 0
 local GIFT_MAX = 1e10 -- default 10B
 
 local Indicator
-
 
 local TRADE_LIMIT = 3
 local tradedCount = 0
@@ -33,6 +37,19 @@ local GIFT_DELAY = 0.25
 local AUTO_GIFT = false
 local TARGET_NAME = ""
 
+local Config = {
+    AUTO_GIFT = AUTO_GIFT,
+    AUTO_FARM = AUTO_FARM,
+
+    GIFT_MIN = GIFT_MIN,
+    GIFT_MAX = GIFT_MAX,
+    TRADE_LIMIT = TRADE_LIMIT,
+    TARGET_NAME = TARGET_NAME,
+
+    FARM_THRESH = FARM_THRESH,
+    UPG_DELAY = UPG_DELAY,
+    LOOP_DELAY = LOOP_DELAY
+}
 
 local Plots = workspace.Plots
 
@@ -71,6 +88,41 @@ button.MouseButton1Click:Connect(function()
     button.Text = "STOPPED"
     button.BackgroundColor3 = Color3.fromRGB(80,80,80)
 end)
+
+local function SaveConfig()
+    Config.AUTO_GIFT = AUTO_GIFT
+    Config.AUTO_FARM = AUTO_FARM
+    Config.GIFT_MIN = GIFT_MIN
+    Config.GIFT_MAX = GIFT_MAX
+    Config.TRADE_LIMIT = TRADE_LIMIT
+    Config.TARGET_NAME = TARGET_NAME
+    Config.FARM_THRESH = FARM_THRESH
+    Config.UPG_DELAY = UPG_DELAY
+    Config.LOOP_DELAY = LOOP_DELAY
+
+    if writefile then
+        writefile(CONFIG_FILE, HttpService:JSONEncode(Config))
+    end
+end
+
+local function LoadConfig()
+    if not readfile then return end
+    if not isfile(CONFIG_FILE) then return end
+
+    local data = HttpService:JSONDecode(readfile(CONFIG_FILE))
+
+    AUTO_GIFT = data.AUTO_GIFT or AUTO_GIFT
+    AUTO_FARM = data.AUTO_FARM or AUTO_FARM
+
+    GIFT_MIN = data.GIFT_MIN or GIFT_MIN
+    GIFT_MAX = data.GIFT_MAX or GIFT_MAX
+    TRADE_LIMIT = data.TRADE_LIMIT or TRADE_LIMIT
+    TARGET_NAME = data.TARGET_NAME or TARGET_NAME
+
+    FARM_THRESH = data.FARM_THRESH or FARM_THRESH
+    UPG_DELAY = data.UPG_DELAY or UPG_DELAY
+    LOOP_DELAY = data.LOOP_DELAY or LOOP_DELAY
+end
 
 --==================================================
 -- UTILS
@@ -297,6 +349,8 @@ task.spawn(function()
     end
 end)
 
+LoadConfig()
+
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 local Window = Rayfield:CreateWindow({
@@ -309,6 +363,11 @@ local Window = Rayfield:CreateWindow({
 -- MAIN TAB (GIFT)
 --==================================================
 local MainTab = Window:CreateTab("Auto Gift")
+
+Indicator = MainTab:CreateParagraph({
+    Title = "Trade Stats",
+    Content = "Idle"
+})
 
 MainTab:CreateToggle({
     Name = "Auto Gift",
@@ -375,11 +434,6 @@ MainTab:CreateInput({
     end
 })
 
-Indicator = MainTab:CreateParagraph({
-    Title = "Trade Stats",
-    Content = "Idle"
-})
-
 --==================================================
 -- AUTO FARM TAB
 --==================================================
@@ -433,3 +487,13 @@ FarmTab:CreateInput({
         end
     end
 })
+
+game:BindToClose(function()
+    SaveConfig()
+end)
+
+task.spawn(function()
+    while task.wait(5) do
+        SaveConfig()
+    end
+end)
