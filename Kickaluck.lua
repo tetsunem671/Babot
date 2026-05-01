@@ -23,6 +23,8 @@ local FARM_THRESH = 1
 local GIFT_MIN = 0
 local GIFT_MAX = 1e10 -- default 10B
 
+local AutoFarmToggle
+local GiftToggle
 local Indicator
 
 local TRADE_LIMIT = 3
@@ -264,6 +266,7 @@ task.spawn(function()
                 end
             end
         end
+        AutoFarmToggle:Set(false)
     end
 end)
 
@@ -346,6 +349,7 @@ task.spawn(function()
             end
         end
 
+        GiftToggle:Set(false)
         task.wait(0.2)
     end
 end)
@@ -370,18 +374,11 @@ Indicator = MainTab:CreateParagraph({
     Content = "Idle"
 })
 
-MainTab:CreateToggle({
+GiftToggle = MainTab:CreateToggle({
     Name = "Auto Gift",
     CurrentValue = AUTO_GIFT,
     Callback = function(v)
         AUTO_GIFT = v
-
-        if not v then
-            tradedCount = 0
-            lastTraded = "None"
-            startTime = 0
-            updateUI()
-        end
     end
 })
 -- MIN
@@ -440,7 +437,7 @@ MainTab:CreateInput({
 --==================================================
 local FarmTab = Window:CreateTab("Auto Farm")
 
-FarmTab:CreateToggle({
+AutoFarmToggle = FarmTab:CreateToggle({
     Name = "Auto Farm (Place + Upgrade)",
     CurrentValue = AUTO_FARM,
     Callback = function(v)
