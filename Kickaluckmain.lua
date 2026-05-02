@@ -32,8 +32,7 @@ GiftTab:CreateToggle({
 
 GiftTab:CreateInput({
     Name = "Gift MIN (e.g. 1M)",
-    PlaceholderText = "                ",
-    CurrentValue = Core.GIFT_MIN,
+    CurrentValue = tostring(Core.GIFT_MIN or ""),
     Callback = function(txt)
         Core.GIFT_MIN = Core.Parse(txt)
     end
@@ -41,8 +40,7 @@ GiftTab:CreateInput({
 
 GiftTab:CreateInput({
     Name = "Gift MAX (e.g. 10B)",
-    PlaceholderText = "                ",
-    CurrentValue = Core.GIFT_MAX,
+    CurrentValue = tostring(Core.GIFT_MAX or ""),
     Callback = function(txt)
         Core.GIFT_MAX = Core.Parse(txt)
     end
@@ -50,13 +48,11 @@ GiftTab:CreateInput({
 
 GiftTab:CreateInput({
     Name = "Target Player",
-    PlaceholderText = "                ",
-    CurrentValue = "",
+    CurrentValue = Core.TARGET_NAME or "",
     Callback = function(txt)
         Core.TARGET_NAME = txt
     end
 })
-
 --==================================================
 -- FARM TAB
 --==================================================
@@ -72,8 +68,7 @@ FarmTab:CreateToggle({
 
 FarmTab:CreateInput({
     Name = "Farm Threshold",
-    PlaceholderText = "                ",
-    CurrentValue = Core.FARM_THRESH,
+    CurrentValue = tostring(Core.FARM_THRESH or ""),
     Callback = function(txt)
         Core.FARM_THRESH = Core.Parse(txt)
     end
@@ -81,8 +76,7 @@ FarmTab:CreateInput({
 
 FarmTab:CreateInput({
     Name = "Upgrade Delay",
-    PlaceholderText = "                ",
-    CurrentValue = Core.UPG_DELAY,
+    CurrentValue = tostring(Core.UPG_DELAY or ""),
     Callback = function(txt)
         Core.UPG_DELAY = tonumber(txt) or Core.UPG_DELAY
     end
@@ -90,8 +84,7 @@ FarmTab:CreateInput({
 
 FarmTab:CreateInput({
     Name = "Loop Delay",
-    PlaceholderText = "                ",
-    CurrentValue = Core.LOOP_DELAY,
+    CurrentValue = tostring(Core.LOOP_DELAY or ""),
     Callback = function(txt)
         Core.LOOP_DELAY = tonumber(txt) or Core.LOOP_DELAY
     end
