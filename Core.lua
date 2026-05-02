@@ -264,6 +264,7 @@ local function getTarget()
 end
 
 local function tradeWith(target)
+    print(target)
     local char = target.Character
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
     if not hrp then return false end
