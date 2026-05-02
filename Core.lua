@@ -16,11 +16,7 @@ local Tags = require(ReplicatedStorage.Shared.Data.Tags)
 local EntitiesData = require(ReplicatedStorage.Shared.Data.EntitiesData)
 
 --// VFX
-local VFX = loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/tetsunem671/Babot/refs/heads/main/removeeffects.lua"
-))()
-
-VFX:Start()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/tetsunem671/Babot/refs/heads/main/removeeffects.lua"))()
 
 --==================================================
 -- STATE
