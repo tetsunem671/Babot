@@ -317,8 +317,6 @@ task.spawn(function()
 
         if Core.tradedCount >= Core.TRADE_LIMIT then task.wait(0.5) continue end
 
-            
-
         for _, tool in ipairs(player.Backpack:GetChildren()) do
             if not Core.AUTO_GIFT then break end
             if Core.tradedCount >= Core.TRADE_LIMIT then task.wait(0.5) continue end
@@ -339,7 +337,7 @@ task.spawn(function()
                 end
             end
         end
-            
+        Core.tradedCount = 0
         _G.AutoGiftToggle:Set(false)
     end
 end)
