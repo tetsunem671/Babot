@@ -1,4 +1,7 @@
 --// CORE (FROM GITHUB)
+_G.AutoGiftToggle = nil
+_G.AutoFarmToggle = nil
+
 local Core = loadstring(game:HttpGet(
     "https://raw.githubusercontent.com/tetsunem671/Babot/refs/heads/main/Core.lua"
 ))()
@@ -22,7 +25,7 @@ local Indicator = GiftTab:CreateParagraph({
     Content = "Idle"
 })
 
-GiftTab:CreateToggle({
+_G.AutoGiftToggle = GiftTab:CreateToggle({
     Name = "Auto Gift",
     CurrentValue = Core.AUTO_GIFT,
     Callback = function(v)
@@ -61,7 +64,7 @@ GiftTab:CreateInput({
 --==================================================
 local FarmTab = Window:CreateTab("Auto Farm")
 
-FarmTab:CreateToggle({
+_G.AutoFarmToggle = FarmTab:CreateToggle({
     Name = "Auto Farm (Place + Upgrade)",
     CurrentValue = Core.AUTO_FARM,
     Callback = function(v)
