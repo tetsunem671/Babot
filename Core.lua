@@ -145,19 +145,7 @@ end
 -- FARM LOGIC
 --==================================================
 local function interactSlot(i)
-    local s = slot(i)
-    if not s then return false end
-
-    local prompt = s:FindFirstChildWhichIsA("ProximityPrompt", true)
-    local part = s:WaitForChild("UpgradeSign", 2)
-    if not prompt or not part then return false end
-
-    tweenTo(part.CFrame)
-
-    prompt.HoldDuration = 0
-    prompt:InputHoldBegin()
-    task.wait()
-    prompt:InputHoldEnd()
+    fire("S_Interact", i)
 
     return true
 end
@@ -209,7 +197,7 @@ local function upgradeFully(i)
             local lvl = placed:GetAttribute("Level")
             if lvl and lvl >= MAX_LEVEL then break end
 
-            upgradePrompt(i)
+            fire("B_Upgrade", i)
             task.wait(Core.UPG_DELAY)
         end
     end
