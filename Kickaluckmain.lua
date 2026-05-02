@@ -23,7 +23,7 @@ local Window = Rayfield:CreateWindow({
 --==================================================
 local GiftTab = Window:CreateTab("Auto Gift")
 
-local Indicator = GiftTab:CreateParagraph({
+_G.Indicator = GiftTab:CreateParagraph({
     Title = "Trade Stats",
     Content = "Idle"
 })
@@ -51,6 +51,19 @@ GiftTab:CreateInput({
     CurrentValue = tostring(Core.GIFT_MAX or ""),
     Callback = function(txt)
         Core.GIFT_MAX = Core.Parse(txt)
+    end
+})
+
+GiftTab:CreateInput({
+    Name = "Trade Limit",
+    PlaceholderText = tostring(Core.TRADE_LIMIT),
+    RemoveTextAfterFocusLost = false,
+    Callback = function(txt)
+        local n = tonumber(txt)
+        if n and n > 0 then
+            Core.TRADE_LIMIT = math.floor(n)
+            print("Trade Limit:", Core.TRADE_LIMIT)
+        end
     end
 })
 
@@ -142,8 +155,8 @@ end)
 --==================================================
 task.spawn(function()
     while task.wait(0.5) do
-        if Indicator then
-            Indicator:Set({
+        if _G.Indicator then
+            _G.Indicator:Set({
                 Title = "Trade Stats",
                 Content = string.format(
                     "Traded: %d / %d\nLast: %s\nTime: %ds",
