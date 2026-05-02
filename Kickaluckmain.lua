@@ -96,6 +96,41 @@ FarmTab:CreateInput({
     end
 })
 
+function Core.Stop()
+    if Core.Stopped then return end
+    Core.Stopped = true
+
+    Core.Running = false
+    Core.AUTO_FARM = false
+    Core.AUTO_GIFT = false
+
+    print("[Core] Stopping all systems...")
+
+    -- kill VFX loop if it exists
+    if _G.__VFX_STOP then
+        _G.__VFX_STOP()
+    end
+end
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "STOP_GUI"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 160, 0, 50)
+button.Position = UDim2.new(0, 20, 0.5, 0)
+button.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+button.TextColor3 = Color3.new(1,1,1)
+button.Text = "STOP SCRIPT"
+button.Parent = gui
+
+button.MouseButton1Click:Connect(function()
+    Stop()
+    button.Text = "STOPPED"
+    button.BackgroundColor3 = Color3.fromRGB(70,70,70)
+end)
+
 --==================================================
 -- STATS UI LOOP
 --==================================================
