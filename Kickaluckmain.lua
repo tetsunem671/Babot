@@ -1,3 +1,6 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
 --// CORE (FROM GITHUB)
 _G.AutoGiftToggle = nil
 _G.AutoFarmToggle = nil
