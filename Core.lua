@@ -253,16 +253,13 @@ end)
 -- GIFT SYSTEM
 --==================================================
 local function getTarget()
+    print(Core.TARGET_NAME)
     if Core.TARGET_NAME ~= "" then
         for _, p in ipairs(Players:GetPlayers()) do
             if p.Name:lower() == Core.TARGET_NAME:lower() then
                 return p
             end
         end
-    end
-
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= player then return p end
     end
 end
 
