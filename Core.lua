@@ -330,7 +330,8 @@ task.spawn(function()
                 if value >= Core.GIFT_MIN and value <= Core.GIFT_MAX then
                     task.wait(0.5)
                     print("[Gift Target Selected]:", target and target.Name or "NONE")
-                    tradeWith(target)
+                    --tradeWith(target)
+                    fire("GiftRequest", target.UserId)
                     repeat task.wait(0.5) until tool.Parent ~= player.Character
                     Core.tradedCount += 1
                     Core.lastTraded = tool.Name
