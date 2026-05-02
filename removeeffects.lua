@@ -1,6 +1,12 @@
 --// SERVICES
 local workspace = game:GetService("Workspace")
 
+_G.__VFX_STOP = function()
+    _G.__VFX_DISABLED = true
+end
+
+_G.__VFX_DISABLED = false
+
 --==================================================
 -- CORE HANDLER
 --==================================================
@@ -90,6 +96,7 @@ end
 -- REAL-TIME HOOK (CRITICAL)
 --==================================================
 workspace.DescendantAdded:Connect(function(v)
+    if _G.__VFX_DISABLED then return end
     handleVFX(v)
 end)
 
@@ -97,7 +104,7 @@ end)
 -- FAILSAFE LOOP (ANTI-REENABLE / FAST EMIT)
 --==================================================
 task.spawn(function()
-    while true do
+    while not _G.__VFX_DISABLED do
         for _, v in ipairs(workspace:GetDescendants()) do
             if v:IsA("ParticleEmitter") then
                 v.Enabled = false
