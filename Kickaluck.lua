@@ -201,9 +201,9 @@ local function updateUI()
         Title = "Trade Stats",
         Content = string.format(
             "Traded: %d / %d\nLast: %s\nTime: %ds",
-            Core.tradedCount,
-            Core.TRADE_LIMIT,
-            Core.lastTraded,
+            tradedCount,
+            TRADE_LIMIT,
+            lastTraded,
             elapsed
         )
     })
