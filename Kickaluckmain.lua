@@ -9,6 +9,22 @@ local Core = loadstring(game:HttpGet(
     "https://raw.githubusercontent.com/tetsunem671/Babot/refs/heads/main/Core.lua"
 ))()
 
+local function fixPrompt(prompt)
+    if prompt:IsA("ProximityPrompt") then
+        prompt.HoldDuration = 0
+    end
+end
+
+-- Apply to all existing prompts
+for _, v in ipairs(workspace:GetDescendants()) do
+    fixPrompt(v)
+end
+
+-- Apply to any new prompts added later
+workspace.DescendantAdded:Connect(function(descendant)
+    fixPrompt(descendant)
+end)
+
 --// UI LIB
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
