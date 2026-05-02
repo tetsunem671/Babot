@@ -242,6 +242,7 @@ task.spawn(function()
                     end
                 end
             end
+            _G.AutoFarmToggle:Set(false)
         end
     end
 end)
@@ -314,6 +315,7 @@ task.spawn(function()
                 end
             end
         end
+        _G.AutoGiftToggle:Set(false)
     end
 end)
 
