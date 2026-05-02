@@ -22,6 +22,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/tetsunem671/Babot/ref
 -- STATE
 --==================================================
 Core.Running = true
+Core.Stopped = false
 
 Core.AUTO_FARM = false
 Core.AUTO_GIFT = false
@@ -66,6 +67,14 @@ local Slots = Plot.Slots
 --==================================================
 -- UTILS
 --==================================================
+local function ue()
+    local c,b = player.Character, player.Backpack
+    if not c then return end
+    for _,v in ipairs(c:GetChildren()) do
+        if v:IsA("Tool") then v.Parent = b end
+    end
+end
+
 local function parse(s)
     if not s then return 0 end
     s = tostring(s):upper():gsub(",", ""):gsub("%s+", "")
@@ -217,7 +226,8 @@ task.spawn(function()
         for _, tool in ipairs(player.Backpack:GetChildren()) do
             if not Core.AUTO_FARM then break end
 
-            if tool:IsA("Tool") and tool:GetAttribute("Level") < 75 then
+            if tool:IsA("Tool") and ((tool:GetAttribute("Level") or 0) < 75) then
+                ue()
                 tool.Parent = player.Character
                 task.wait(0.2)
 
