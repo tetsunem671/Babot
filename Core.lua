@@ -254,13 +254,26 @@ end)
 --==================================================
 local function getTarget()
     print(Core.TARGET_NAME)
-    if Core.TARGET_NAME ~= "" then
+    local name = tostring(Core.TARGET_NAME or ""):lower():gsub("%s+", "")
+    local me = player
+
+    -- explicit target
+    if name ~= "" then
         for _, p in ipairs(Players:GetPlayers()) do
-            if p.Name:lower() == Core.TARGET_NAME:lower() then
+            if p ~= me and p.Name:lower() == name then
                 return p
             end
         end
     end
+
+    -- fallback: first valid OTHER player
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= me and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            return p
+        end
+    end
+
+    return nil
 end
 
 local function tradeWith(target)
@@ -297,12 +310,18 @@ task.spawn(function()
 
         local target = getTarget()
         if not target then task.wait(1) continue end
+        if target == player then
+            warn("[Gift] blocked self-trade attempt")
+            continue
+        end
 
         if Core.tradedCount >= Core.TRADE_LIMIT then task.wait(0.5) continue end
 
+            
+
         for _, tool in ipairs(player.Backpack:GetChildren()) do
             if not Core.AUTO_GIFT then break end
-
+            if Core.tradedCount >= Core.TRADE_LIMIT then task.wait(0.5) continue end
             if isGiftable(tool) then
                 ue()
                 tool.Parent = player.Character
@@ -312,8 +331,9 @@ task.spawn(function()
 
                 if value >= Core.GIFT_MIN and value <= Core.GIFT_MAX then
                     task.wait(0.5)
+                    print("[Gift Target Selected]:", target and target.Name or "NONE")
                     tradeWith(target)
-
+                    repeat task.wait(0.5) until tool.Parent ~= player.Character
                     Core.tradedCount += 1
                     Core.lastTraded = tool.Name
                 end
