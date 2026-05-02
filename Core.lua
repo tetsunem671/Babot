@@ -67,20 +67,6 @@ local Slots = Plot.Slots
 --==================================================
 -- UTILS
 --==================================================
-local function updateUI()
-    local elapsed = startTime > 0 and math.floor(os.clock() - startTime) or 0
-
-    _G.Indicator:Set({
-        Title = "Trade Stats",
-        Content = string.format(
-            "Traded: %d / %d\nLast: %s\nTime: %ds",
-            tradedCount,
-            TRADE_LIMIT,
-            lastTraded,
-            elapsed
-        )
-    })
-end
 
 local function ue()
     local c,b = player.Character, player.Backpack
@@ -314,7 +300,7 @@ task.spawn(function()
         local target = getTarget()
         if not target then task.wait(1) continue end
 
-        if tradedCount >= TRADE_LIMIT then task.wait(0.5) continue end
+        if Core.tradedCount >= Core.TRADE_LIMIT then task.wait(0.5) continue end
 
         for _, tool in ipairs(player.Backpack:GetChildren()) do
             if not Core.AUTO_GIFT then break end
