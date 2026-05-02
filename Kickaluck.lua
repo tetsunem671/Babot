@@ -1,11 +1,11 @@
 --// SERVICES
 local P = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
 local R = game:GetService("ReplicatedStorage")
 
 local player = P.LocalPlayer
 local Network = require(R.Shared.Packages.Network)
-
-local HttpService = game:GetService("HttpService")
 
 local CONFIG_FILE = "auto_farm_config.json"
 
@@ -16,7 +16,7 @@ local EntitiesData = require(R.Shared.Data.EntitiesData)
 --==================================================
 -- SETTINGS
 --==================================================
-local MIN_SLOT, MAX_SLOT, MAX_LEVEL = 21, 30, 75
+local MIN_SLOT, MAX_SLOT, MAX_LEVEL = 21, 21, 75
 
 
 local FARM_THRESH = 1
@@ -39,6 +39,22 @@ local GIFT_DELAY = 0.25
 local AUTO_FARM = false
 local AUTO_GIFT = false
 local TARGET_NAME = ""
+
+local function fixPrompt(prompt)
+    if prompt:IsA("ProximityPrompt") then
+        prompt.HoldDuration = 0
+    end
+end
+
+-- Apply to all existing prompts
+for _, v in ipairs(workspace:GetDescendants()) do
+    fixPrompt(v)
+end
+
+-- Apply to any new prompts added later
+workspace.DescendantAdded:Connect(function(descendant)
+    fixPrompt(descendant)
+end)
 
 local Config = {
     AUTO_GIFT = AUTO_GIFT,
@@ -137,6 +153,39 @@ end
 --==================================================
 -- UTILS
 --==================================================
+local function isNear(cf)
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return false end
+
+    return (hrp.Position - cf.Position).Magnitude <= 20
+end
+
+local function randDelay(base)
+    return base + (math.random() * base * 0.5)
+end
+
+local function tweenTo(cf)
+    local char = player.Character
+    if not char then return end
+
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    local dist = (hrp.Position - cf.Position).Magnitude
+    if dist <= 20 then return end -- already close enough
+
+    local t = dist / 60 -- speed factor (adjust if needed)
+
+    local tween = TweenService:Create(
+        hrp,
+        TweenInfo.new(t, Enum.EasingStyle.Linear),
+        {CFrame = cf}
+    )
+
+    tween:Play()
+    tween.Completed:Wait()
+end
+
 local function ue()
     local c,b = player.Character, player.Backpack
     if not c then return end
@@ -203,6 +252,74 @@ end
 --==================================================
 -- SLOT / UPGRADE
 --==================================================
+local function getPromptFromSlot(i)
+    local s = slot(i)
+    if not s then return end
+
+    return s:FindFirstChildWhichIsA("ProximityPrompt", true)
+end
+
+
+local function interactSlot(i)
+    local s = slot(i)
+    if not s then return end
+    
+    local prompt = getPromptFromSlot(i)
+    if not prompt then return false end
+
+    local part = s:WaitForChild("UpgradeSign")
+    if not part then return false end
+
+    tweenTo(part.CFrame)
+
+    -- ensure instant trigger
+    prompt.HoldDuration = 0
+
+    -- safest built-in trigger
+    prompt:InputHoldBegin()
+    task.wait()
+    prompt:InputHoldEnd()
+
+    return true
+end
+
+local function getUpgradePrompt(i)
+    local s = slot(i)
+    if not s then return end
+
+    local placed = s:FindFirstChild("PlacedPart")
+    if placed then
+        return placed:FindFirstChildWhichIsA("ProximityPrompt", true)
+    end
+
+    local attachment = s:FindFirstChild("Attachment")
+    if attachment then
+        return attachment:FindFirstChildWhichIsA("ProximityPrompt", true)
+    end
+end
+
+local function upgradePrompt(i)
+    local prompt = getUpgradePrompt(i)
+    if not prompt then return false end
+
+    local part = prompt.Parent
+    if not part then return false end
+
+    tweenTo(part.CFrame)
+
+    prompt.HoldDuration = 0
+
+    if fireproximityprompt then
+        fireproximityprompt(prompt)
+    else
+        prompt:InputHoldBegin()
+        task.wait(0.1)
+        prompt:InputHoldEnd()
+    end
+
+    return true
+end
+
 local function getFreeSlot()
     for i = MIN_SLOT, MAX_SLOT do
         if slot(i) then return i end
@@ -224,8 +341,8 @@ local function upgradeFully(i)
             local lvl = placed:GetAttribute("Level")
             if lvl and lvl >= MAX_LEVEL then break end
 
-            fire("B_Upgrade", i)
-            task.wait(UPG_DELAY)
+            upgradePrompt(i)
+            task.wait(randDelay(UPG_DELAY))
         end
     end
 end
@@ -233,13 +350,14 @@ end
 --==================================================
 -- AUTO PLACE + UPGRADE LOOP
 --==================================================
+
 task.spawn(function()
     while Controller.Running do
         if not AUTO_FARM then
             task.wait(0.5)
             continue
         end
-        task.wait(LOOP_DELAY)
+        task.wait(randDelay(LOOP_DELAY))
 
         for _,tool in ipairs(player.Backpack:GetChildren()) do
             if not AUTO_FARM then
@@ -248,7 +366,7 @@ task.spawn(function()
             end
             if not Controller.Running then break end
 
-            if tool:IsA("Tool") and not table.find(ignore_Name, tool.Name) then
+            if tool:IsA("Tool") and not table.find(ignore_Name, tool.Name) and tool:GetAttribute("Level") < 75 then
                 ue()
                 tool.Parent = player.Character
                 task.wait(0.2)
@@ -259,7 +377,7 @@ task.spawn(function()
                     local i = getFreeSlot()
 
                     if i then
-                        fire("S_Interact", i)
+                        interactSlot(i)
 
                         repeat task.wait() until slot(i)
                             and slot(i):FindFirstChild("PlacedPart")
@@ -277,6 +395,35 @@ end)
 --==================================================
 -- GIFT SYSTEM
 --==================================================
+local function getTradePrompt(target)
+    local char = target.Character
+    if not char then return end
+
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    -- wait for the injected prompt
+    return hrp:FindFirstChild("GiftPrompt") 
+        or hrp:WaitForChild("GiftPrompt", 2)
+end
+
+local function tradeWith(target)
+    local prompt = getTradePrompt(target)
+    if not prompt then return false end
+
+    tweenTo(prompt.Parent.CFrame)
+
+    if fireproximityprompt then
+        fireproximityprompt(prompt)
+    else
+        prompt:InputHoldBegin()
+        task.wait(0.1)
+        prompt:InputHoldEnd()
+    end
+
+    return true
+end
+
 local function isGiftable(tool)
     return tool:IsA("Tool")
         and tool:HasTag(Tags.EntityTool)
@@ -307,6 +454,7 @@ end
 --==================================================
 -- AUTO GIFT LOOP
 --==================================================
+
 task.spawn(function()
     while Controller.Running do
         if startTime == 0 then
@@ -340,8 +488,9 @@ task.spawn(function()
 
                 local value = cps()
 
-                if value >= GIFT_MIN and value <= GIFT_MAX then        
-                    fire("GiftRequest", target.UserId)
+                if value >= GIFT_MIN and value <= GIFT_MAX then     
+                    task.wait(0.5 + math.random() * 0.5)
+                    tradeWith(target)
 
                     repeat task.wait(GIFT_DELAY)
                     until tool.Parent ~= player.Character
