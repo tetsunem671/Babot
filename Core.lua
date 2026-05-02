@@ -226,7 +226,7 @@ task.spawn(function()
         for _, tool in ipairs(player.Backpack:GetChildren()) do
             if not Core.AUTO_FARM then break end
 
-            if tool:IsA("Tool") and ((tool:GetAttribute("Level") or 0) < 75) then
+            if tool:IsA("Tool") and ((tool:GetAttribute("Level") or 0) < 75) and tool:GetAttribute("GUID") then
                 ue()
                 tool.Parent = player.Character
                 task.wait(0.2)
