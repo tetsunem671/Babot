@@ -1,147 +1,111 @@
 --// SERVICES
 local workspace = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
-
-local VFX = {}
 
 --==================================================
--- SETTINGS
+-- CORE HANDLER
 --==================================================
-VFX.Enabled = true
-VFX.Auto = false -- auto-disable on low FPS
+local function handleVFX(obj)
 
-local TARGET_NAMES = {
-    "Effect",
-    "VFX",
-    "Particle",
-    "Trail",
-    "Beam"
-}
-
---==================================================
--- INTERNAL
---==================================================
-local cache = {}
-local connections = {}
-local loopRunning = false
-
-local function isEntityVFX(obj)
-    -- filter: ignore UI / keep only world effects
-    if obj:IsDescendantOf(game.Players.LocalPlayer.PlayerGui) then
-        return false
-    end
-
-    for _,name in ipairs(TARGET_NAMES) do
-        if string.find(obj.Name, name) then
-            return true
-        end
-    end
-
-    return obj:IsA("ParticleEmitter")
-        or obj:IsA("Trail")
-        or obj:IsA("Beam")
-end
-
-local function cacheProp(obj, prop, val)
-    cache[obj] = cache[obj] or {}
-    if cache[obj][prop] == nil then
-        cache[obj][prop] = val
-    end
-end
-
-local function restoreAll()
-    for obj,data in pairs(cache) do
-        for prop,val in pairs(data) do
-            pcall(function()
-                obj[prop] = val
-            end)
-        end
-    end
-end
-
-local function handle(obj)
-    if VFX.Enabled then return end
-    if not isEntityVFX(obj) then return end
-
+    --==============================
+    -- PARTICLE EMITTER (main problem)
+    --==============================
     if obj:IsA("ParticleEmitter") then
-        cacheProp(obj,"Enabled",obj.Enabled)
-        cacheProp(obj,"Rate",obj.Rate)
-
         obj.Enabled = false
         obj.Rate = 0
         obj.Speed = NumberRange.new(0)
         obj.Lifetime = NumberRange.new(0)
         obj:Clear()
-    elseif obj:IsA("Trail") or obj:IsA("Beam") then
-        cacheProp(obj,"Enabled",obj.Enabled)
+
+        -- lock it permanently
+        obj:GetPropertyChangedSignal("Enabled"):Connect(function()
+            if obj.Enabled then obj.Enabled = false end
+        end)
+
+        obj:GetPropertyChangedSignal("Rate"):Connect(function()
+            if obj.Rate ~= 0 then obj.Rate = 0 end
+        end)
+
+        return
+    end
+
+    --==============================
+    -- TRAILS / BEAMS
+    --==============================
+    if obj:IsA("Trail") or obj:IsA("Beam") then
         obj.Enabled = false
+
+        obj:GetPropertyChangedSignal("Enabled"):Connect(function()
+            if obj.Enabled then obj.Enabled = false end
+        end)
+
+        return
+    end
+
+    --==============================
+    -- SIMPLE EFFECTS
+    --==============================
+    if obj:IsA("Smoke")
+    or obj:IsA("Fire")
+    or obj:IsA("Sparkles") then
+
+        obj.Enabled = false
+
+        obj:GetPropertyChangedSignal("Enabled"):Connect(function()
+            if obj.Enabled then obj.Enabled = false end
+        end)
+
+        return
+    end
+
+    --==============================
+    -- EXPLOSIONS
+    --==============================
+    if obj:IsA("Explosion") then
+        obj.Visible = false
+        return
+    end
+
+    --==============================
+    -- HIGHLIGHTS
+    --==============================
+    if obj:IsA("Highlight") then
+        obj.Enabled = false
+
+        obj:GetPropertyChangedSignal("Enabled"):Connect(function()
+            if obj.Enabled then obj.Enabled = false end
+        end)
+
+        return
     end
 end
 
 --==================================================
--- CORE API
+-- INITIAL SWEEP
 --==================================================
-function VFX:Set(state)
-    self.Enabled = state
-
-    if state then
-        -- restore
-        restoreAll()
-    else
-        -- disable
-        for _,v in ipairs(workspace:GetDescendants()) do
-            handle(v)
-        end
-    end
-end
-
-function VFX:Start()
-    workspace.DescendantAdded:Connect(function(v)
-        handle(v)
-    end)
-
-    if loopRunning then return end
-    loopRunning = true
-
-    task.spawn(function()
-        while loopRunning do
-            if not self.Enabled then
-                for _,v in ipairs(workspace:GetDescendants()) do
-                    handle(v)
-                end
-            end
-            task.wait(0.5)
-        end
-    end)
+for _, v in ipairs(workspace:GetDescendants()) do
+    handleVFX(v)
 end
 
 --==================================================
--- FPS SYSTEM
+-- REAL-TIME HOOK (CRITICAL)
 --==================================================
-local fps = 60
-RunService.RenderStepped:Connect(function(dt)
-    fps = math.floor(1/dt)
+workspace.DescendantAdded:Connect(function(v)
+    handleVFX(v)
 end)
 
-function VFX:GetFPS()
-    return fps
-end
-
-function VFX:SetAuto(state)
-    self.Auto = state
-
-    if state then
-        task.spawn(function()
-            while self.Auto do
-                if fps < 30 then
-                    self:Set(false) -- disable VFX
-                else
-                    self:Set(true) -- enable VFX
-                end
-                task.wait(2)
+--==================================================
+-- FAILSAFE LOOP (ANTI-REENABLE / FAST EMIT)
+--==================================================
+task.spawn(function()
+    while true do
+        for _, v in ipairs(workspace:GetDescendants()) do
+            if v:IsA("ParticleEmitter") then
+                v.Enabled = false
+                v.Rate = 0
+            elseif v:IsA("Trail") or v:IsA("Beam") then
+                v.Enabled = false
             end
-        end)
+        end
+        task.wait(0.5) -- adjust (lower = stronger, higher = lighter)
     end
-end
-
-return VFX
+end)
