@@ -132,12 +132,11 @@ FarmTab:CreateInput({
 })
 
 function Core.Stop()
-    if Core.Stopped then return end
     Core.Stopped = true
 
     Core.Running = false
-    Core.AUTO_FARM = false
-    Core.AUTO_GIFT = false
+    _G.AutoFarmToggle:Set(false)
+    _G.AutoGiftToggle:Set(false)
 
     print("[Core] Stopping all systems...")
 
