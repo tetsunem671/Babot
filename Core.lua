@@ -306,12 +306,14 @@ task.spawn(function()
             if not Core.AUTO_GIFT then break end
 
             if isGiftable(tool) then
+                ue()
                 tool.Parent = player.Character
                 task.wait(0.2)
 
                 local value = cps()
 
                 if value >= Core.GIFT_MIN and value <= Core.GIFT_MAX then
+                    task.wait(0.5)
                     tradeWith(target)
 
                     Core.tradedCount += 1
