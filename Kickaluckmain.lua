@@ -165,12 +165,6 @@ button.MouseButton1Click:Connect(function()
     button.BackgroundColor3 = Color3.fromRGB(70,70,70)
 end)
 
-if Network.OnClientEvent then
-    Network.OnClientEvent("SendGift"):Connect(function()
-        fire("SendGift", true)
-    end)
-end
-
 --==================================================
 -- STATS UI LOOP
 --==================================================
