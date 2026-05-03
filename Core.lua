@@ -316,7 +316,7 @@ task.spawn(function()
                 local value = cps()
 
                 if value >= Core.GIFT_MIN and value <= Core.GIFT_MAX then
-                    task.wait(0.1)
+                    task.wait(0.39)
                     print("[Gift Target Selected]:", target and target.Name or "NONE")
                     --tradeWith(target)
                     fire("GiftRequest", target.UserId)
