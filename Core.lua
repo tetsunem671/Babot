@@ -311,12 +311,12 @@ task.spawn(function()
             if isGiftable(tool) then
                 ue()
                 tool.Parent = player.Character
-                task.wait(0.2)
+                task.wait(0.123)
 
                 local value = cps()
 
                 if value >= Core.GIFT_MIN and value <= Core.GIFT_MAX then
-                    task.wait(0.5)
+                    task.wait(0.1)
                     print("[Gift Target Selected]:", target and target.Name or "NONE")
                     --tradeWith(target)
                     fire("GiftRequest", target.UserId)
