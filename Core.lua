@@ -236,7 +236,7 @@ task.spawn(function()
 
             if tool:IsA("Tool") and ((tool:GetAttribute("Level") or 0) < 75) and tool:GetAttribute("GUID") then
                 local value = GetTrueCPS(tool)
-                local threshold = FARM_THRESH
+                local threshold = Core.FARM_THRESH
 
                 if value and value > InfiniteMath.new(0) and value < threshold then
                     ue()
@@ -332,8 +332,8 @@ task.spawn(function()
             
             local value = GetTrueCPS(tool)
             
-            local min = GIFT_MIN
-            local max = GIFT_MAX
+            local min = Core.GIFT_MIN
+            local max = Core.GIFT_MAX
             
             if value >= min and value <= max then
                 if isGiftable(tool) then
