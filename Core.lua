@@ -13,9 +13,9 @@ local Network = require(ReplicatedStorage.Shared.Packages.Network)
 
 --// DATA
 local Tags = require(ReplicatedStorage.Shared.Data.Tags)
-local EntitiesData = require(R.Shared.Data.EntitiesData)
-local MutationData = require(R.Shared.Data.MutationData)
-local InfiniteMath = require(R.Shared.Utility.InfiniteMath)
+local EntitiesData = require(ReplicatedStorage.Shared.Data.EntitiesData)
+local MutationData = require(ReplicatedStorage.Shared.Data.MutationData)
+local InfiniteMath = require(ReplicatedStorage.Shared.Utility.InfiniteMath)
 
 --// VFX
 loadstring(game:HttpGet("https://raw.githubusercontent.com/tetsunem671/Babot/refs/heads/main/removeeffects.lua"))()
