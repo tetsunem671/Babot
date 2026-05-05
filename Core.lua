@@ -117,7 +117,7 @@ local function tweenTo(cf)
 end
 
 Core.TweenTo = tweenTo
-
+print("67")
 local function GetTrueCPS(tool)
     if not tool then return InfiniteMath.new(0) end
 
@@ -148,6 +148,7 @@ local function GetTrueCPS(tool)
     cps = cps * levelMulti
 
     local cps2 = ToNumberV2(cps)
+    print(cps, cps2)
 
     return cps2
 end
