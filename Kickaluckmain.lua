@@ -84,6 +84,18 @@ GiftTab:CreateInput({
 })
 
 GiftTab:CreateInput({
+    Name = "Gift Request Delay",
+    PlaceholderText = tostring(Core.GIFT_REQUEST_DELAY),
+    CurrentValue = tostring(Core.GIFT_REQUEST_DELAY),
+    Callback = function(txt)
+        local n = tonumber(txt)
+        if n then
+            Core.GIFT_REQUEST_DELAY = n
+        end
+    end
+})
+
+GiftTab:CreateInput({
     Name = "Target Player",
     PlaceholderText = tostring(Core.TARGET_NAME or ""),
     CurrentValue = Core.TARGET_NAME or "",
