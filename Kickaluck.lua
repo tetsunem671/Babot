@@ -17,7 +17,7 @@ local EntitiesData = require(R.Shared.Data.EntitiesData)
 -- SETTINGS
 --==================================================
 local MIN_SLOT, MAX_SLOT, MAX_LEVEL = 21, 21, 75
-print("63")
+print("634")
 
 local FARM_THRESH = 1
 local GIFT_MIN = 0
@@ -110,6 +110,7 @@ button.TextColor3 = Color3.new(1,1,1)
 button.Text = "STOP SCRIPT"
 
 button.Activated:Connect(function()
+    print("672")
     Controller.Running = false
     button.Text = "STOPPED"
     button.BackgroundColor3 = Color3.fromRGB(80,80,80)
