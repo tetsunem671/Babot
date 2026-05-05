@@ -13,7 +13,9 @@ local Network = require(ReplicatedStorage.Shared.Packages.Network)
 
 --// DATA
 local Tags = require(ReplicatedStorage.Shared.Data.Tags)
-local EntitiesData = require(ReplicatedStorage.Shared.Data.EntitiesData)
+local EntitiesData = require(R.Shared.Data.EntitiesData)
+local MutationData = require(R.Shared.Data.MutationData)
+local InfiniteMath = require(R.Shared.Utility.InfiniteMath)
 
 --// VFX
 loadstring(game:HttpGet("https://raw.githubusercontent.com/tetsunem671/Babot/refs/heads/main/removeeffects.lua"))()
@@ -69,6 +71,9 @@ local Slots = Plot.Slots
 --==================================================
 -- UTILS
 --==================================================
+function ToNumberV2(table)
+    return table.first * (10 ^ table.second)
+end
 
 local function ue()
     local c,b = player.Character, player.Backpack
@@ -113,27 +118,39 @@ end
 
 Core.TweenTo = tweenTo
 
-local function cps()
-    local c = player.Character
-    if not c then return 0 end
+local function GetTrueCPS(tool)
+    if not tool then return InfiniteMath.new(0) end
 
-    for _, t in ipairs(c:GetChildren()) do
-        if t:IsA("Tool") then
-            local m = t:FindFirstChildWhichIsA("Model")
-            if m then
-                local ok, v = pcall(function()
-                    return m.Root.EntityGUI.Frame.CPSFrame.Label.Text
-                end)
-                if ok and v then
-                    return parse(v)
-                end
-            end
+    local name = tool.Name
+    local level = tool:GetAttribute("Level") or 1
+    local mutation = tool:GetAttribute("Mutation")
+
+    local data = EntitiesData.Brainrots[name]
+    if not data or not data.CPS then
+        return InfiniteMath.new(0)
+    end
+
+    local cps = InfiniteMath.new(data.CPS)
+
+    -- mutation multiplier
+    local mutationMulti = 1
+    if mutation then
+        local buff = MutationData.Buffs[mutation]
+        if buff and buff.Value then
+            mutationMulti = buff.Value
         end
     end
-    return 0
-end
 
-Core.CPS = cps
+    cps = cps * InfiniteMath.new(mutationMulti)
+
+    -- level multiplier
+    local levelMulti = InfiniteMath.new(EntitiesData.GetMultiplierPerLevel(level))
+    cps = cps * levelMulti
+
+    local cps2 = ToNumberV2(cps)
+
+    return cps2
+end
 
 local function slot(i)
     return Slots:FindFirstChild("Slot"..i)
@@ -218,13 +235,15 @@ task.spawn(function()
             if not Core.AUTO_FARM then break end
 
             if tool:IsA("Tool") and ((tool:GetAttribute("Level") or 0) < 75) and tool:GetAttribute("GUID") then
-                ue()
-                tool.Parent = player.Character
-                task.wait(0.2)
+                local value = GetTrueCPS(tool)
+                local threshold = FARM_THRESH
 
-                local value = cps()
-
-                if value > 0 and value < Core.FARM_THRESH then
+                if value and value > InfiniteMath.new(0) and value < threshold then
+                    ue()
+                    tool.Parent = player.Character
+                    task.wait(0.2)
+    
+    
                     local i = getFreeSlot()
                     if i then
                         interactSlot(i)
@@ -310,19 +329,23 @@ task.spawn(function()
         for _, tool in ipairs(player.Backpack:GetChildren()) do
             if not Core.AUTO_GIFT then break end
             if Core.tradedCount >= Core.TRADE_LIMIT then task.wait(0.5) continue end
-            if isGiftable(tool) then
-                ue()
-                tool.Parent = player.Character
-                task.wait(0.1)
-
-                local value = cps()
-
-                if value >= Core.GIFT_MIN and value <= Core.GIFT_MAX then
+            
+            local value = GetTrueCPS(tool)
+            
+            local min = GIFT_MIN
+            local max = GIFT_MAX
+            
+            if value >= min and value <= max then
+                if isGiftable(tool) then
+                    ue()
+                    tool.Parent = player.Character
+                    task.wait(0.123)
+    
                     print("[Gift Target Selected]:", target and target.Name or "NONE")
                     --tradeWith(target)
                     fire("GiftRequest", target.UserId)
                     repeat task.wait(0.5) until tool.Parent ~= player.Character
-                    task.wait(Core.GIFT_REQUEST_DELAY - 0.5)
+                    task.wait(Core.GIFT_REQUEST_DELAY)
                     Core.tradedCount += 1
                     Core.lastTraded = tool.Name
                 end
