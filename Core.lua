@@ -39,7 +39,7 @@ Core.startTime = 0
 
 Core.UPG_DELAY = 0.08
 Core.LOOP_DELAY = 0.08
-Core.GIFT_DELAY = 0.25
+Core.GIFT_REQUEST_DELAY = 0.39
 
 local MIN_SLOT, MAX_SLOT, MAX_LEVEL = 21, 21, 75
 
@@ -316,7 +316,7 @@ task.spawn(function()
                 local value = cps()
 
                 if value >= Core.GIFT_MIN and value <= Core.GIFT_MAX then
-                    task.wait(0.39)
+                    task.wait(Core.GIFT_REQUEST_DELAY)
                     print("[Gift Target Selected]:", target and target.Name or "NONE")
                     --tradeWith(target)
                     fire("GiftRequest", target.UserId)
