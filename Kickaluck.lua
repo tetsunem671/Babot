@@ -17,7 +17,7 @@ local EntitiesData = require(R.Shared.Data.EntitiesData)
 -- SETTINGS
 --==================================================
 local MIN_SLOT, MAX_SLOT, MAX_LEVEL = 21, 21, 75
-
+print("63")
 
 local FARM_THRESH = 1
 local GIFT_MIN = 0
