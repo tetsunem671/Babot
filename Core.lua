@@ -147,7 +147,6 @@ local function GetTrueCPS(tool)
     cps = cps * levelMulti
 
     local cps2 = ToNumberV2(cps)
-    print(cps, cps2)
 
     return cps2
 end
