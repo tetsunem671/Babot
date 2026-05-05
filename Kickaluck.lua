@@ -109,7 +109,7 @@ button.BackgroundColor3 = Color3.fromRGB(200,50,50)
 button.TextColor3 = Color3.new(1,1,1)
 button.Text = "STOP SCRIPT"
 
-button.MouseButton1Click:Connect(function()
+button.Activated:Connect(function()
     Controller.Running = false
     button.Text = "STOPPED"
     button.BackgroundColor3 = Color3.fromRGB(80,80,80)
@@ -637,19 +637,17 @@ FarmTab:CreateInput({
     end
 })
 
-game:BindToClose(function()
-    SaveConfig()
-end)
 
 task.spawn(function()
-    while task.wait(5) do
+    while Controller.Running do
+        task.wait(5)
         SaveConfig()
     end
 end)
 
 task.spawn(function()
     while Controller.Running do
-        if AUTO_GIFT then
+        if Core.AUTO_GIFT then
             updateUI()
         end
         task.wait(0.5)
