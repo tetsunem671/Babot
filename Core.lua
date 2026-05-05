@@ -45,6 +45,8 @@ local MIN_SLOT, MAX_SLOT, MAX_LEVEL = 21, 21, 75
 
 local CONFIG_FILE = "auto_farm_config.json"
 
+local TRADELOCKED = {"Esok Sekolah"}
+
 --==================================================
 -- PLOT DETECTION
 --==================================================
@@ -289,7 +291,7 @@ end
 local function isGiftable(tool)
     return tool:IsA("Tool")
         and tool:HasTag(Tags.EntityTool)
-        and not table.find(EntitiesData.TradeLocked, tool.Name)
+        and not table.find(EntitiesData.TradeLocked, tool.Name) and not table.find(TRADELOCKED, tool.Name)
 end
 
 task.spawn(function()
@@ -311,16 +313,16 @@ task.spawn(function()
             if isGiftable(tool) then
                 ue()
                 tool.Parent = player.Character
-                task.wait(0.123)
+                task.wait(0.1)
 
                 local value = cps()
 
                 if value >= Core.GIFT_MIN and value <= Core.GIFT_MAX then
-                    task.wait(Core.GIFT_REQUEST_DELAY)
                     print("[Gift Target Selected]:", target and target.Name or "NONE")
                     --tradeWith(target)
                     fire("GiftRequest", target.UserId)
                     repeat task.wait(0.5) until tool.Parent ~= player.Character
+                    task.wait(Core.GIFT_REQUEST_DELAY - 0.5)
                     Core.tradedCount += 1
                     Core.lastTraded = tool.Name
                 end
