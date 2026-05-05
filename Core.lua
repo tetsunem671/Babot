@@ -117,9 +117,9 @@ local function tweenTo(cf)
 end
 
 Core.TweenTo = tweenTo
-print("67")
+print("62")
 local function GetTrueCPS(tool)
-    if not tool then return InfiniteMath.new(0) end
+    if not tool then return 0 end
 
     local name = tool.Name
     local level = tool:GetAttribute("Level") or 1
@@ -127,10 +127,10 @@ local function GetTrueCPS(tool)
 
     local data = EntitiesData.Brainrots[name]
     if not data or not data.CPS then
-        return InfiniteMath.new(0)
+        return 0
     end
 
-    local cps = InfiniteMath.new(data.CPS)
+    local cps = data.CPS
 
     -- mutation multiplier
     local mutationMulti = 1
@@ -141,10 +141,10 @@ local function GetTrueCPS(tool)
         end
     end
 
-    cps = cps * InfiniteMath.new(mutationMulti)
+    cps = cps * mutationMulti
 
     -- level multiplier
-    local levelMulti = InfiniteMath.new(EntitiesData.GetMultiplierPerLevel(level))
+    local levelMulti = EntitiesData.GetMultiplierPerLevel(level)
     cps = cps * levelMulti
 
     local cps2 = ToNumberV2(cps)
@@ -332,6 +332,7 @@ task.spawn(function()
             if Core.tradedCount >= Core.TRADE_LIMIT then task.wait(0.5) continue end
             
             local value = GetTrueCPS(tool)
+            print(value)
             
             local min = Core.GIFT_MIN
             local max = Core.GIFT_MAX
