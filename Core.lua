@@ -41,7 +41,7 @@ Core.startTime = 0
 
 Core.UPG_DELAY = 0.08
 Core.LOOP_DELAY = 0.08
-Core.GIFT_REQUEST_DELAY = 0.39
+Core.GIFT_REQUEST_DELAY = 10
 
 local MIN_SLOT, MAX_SLOT, MAX_LEVEL = 21, 21, 75
 
@@ -117,7 +117,6 @@ local function tweenTo(cf)
 end
 
 Core.TweenTo = tweenTo
-print("62")
 local function GetTrueCPS(tool)
     if not tool then return 0 end
 
@@ -239,7 +238,7 @@ task.spawn(function()
                 local value = GetTrueCPS(tool)
                 local threshold = Core.FARM_THRESH
 
-                if value and value > InfiniteMath.new(0) and value < threshold then
+                if value and value > 0 and value < threshold then
                     ue()
                     tool.Parent = player.Character
                     task.wait(0.2)
@@ -332,7 +331,6 @@ task.spawn(function()
             if Core.tradedCount >= Core.TRADE_LIMIT then task.wait(0.5) continue end
             
             local value = GetTrueCPS(tool)
-            print(value)
             
             local min = Core.GIFT_MIN
             local max = Core.GIFT_MAX
