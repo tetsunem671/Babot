@@ -116,12 +116,22 @@ _G.AutoFarmToggle = FarmTab:CreateToggle({
     end
 })
 
+
 FarmTab:CreateInput({
-    Name = "Farm Threshold",
-    PlaceholderText = tostring(Core.FARM_THRESH or ""),
-    CurrentValue = tostring(Core.FARM_THRESH or ""),
+    Name = "Farm Min Threshold",
+    PlaceholderText = tostring(Core.FARM_MIN_THRESH or ""),
+    CurrentValue = tostring(Core.FARM_MIN_THRESH or ""),
     Callback = function(txt)
-        Core.FARM_THRESH = Core.Parse(txt)
+        Core.FARM_MIN_THRESH = Core.Parse(txt)
+    end
+})
+
+FarmTab:CreateInput({
+    Name = "Farm Max Threshold",
+    PlaceholderText = tostring(Core.FARM_MAX_THRESH or ""),
+    CurrentValue = tostring(Core.FARM_MAX_THRESH or ""),
+    Callback = function(txt)
+        Core.FARM_MAX_THRESH = Core.Parse(txt)
     end
 })
 
