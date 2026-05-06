@@ -325,6 +325,7 @@ task.spawn(function()
             warn("[Gift] blocked self-trade attempt")
             continue
         end
+        Core.tradedCount = 0
 
         if Core.tradedCount >= Core.TRADE_LIMIT then task.wait(0.5) continue end
 
