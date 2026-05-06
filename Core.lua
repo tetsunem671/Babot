@@ -350,7 +350,6 @@ task.spawn(function()
                 end
             end
         end
-        Core.tradedCount = 0
         _G.AutoGiftToggle:Set(false)
     end
 end)
