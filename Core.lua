@@ -249,6 +249,7 @@ task.spawn(function()
                     if i then
                         interactSlot(i)
                         repeat task.wait() until slot(i) and slot(i):FindFirstChild("PlacedPart")
+                        task.wait(0.5)
                         upgradeFully(i)
                     end
                 end
