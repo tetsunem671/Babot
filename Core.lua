@@ -30,7 +30,8 @@ Core.AUTO_FARM = false
 Core.AUTO_GIFT = false
 Core.TARGET_NAME = ""
 
-Core.FARM_THRESH = 1
+Core.FARM_MIN_THRESH = 1
+Core.FARM_MAX_THRESH = 1e10
 Core.GIFT_MIN = 0
 Core.GIFT_MAX = 1e10
 
@@ -235,9 +236,10 @@ task.spawn(function()
 
             if tool:IsA("Tool") and ((tool:GetAttribute("Level") or 0) < 75) and tool:GetAttribute("GUID") then
                 local value = GetTrueCPS(tool)
-                local threshold = Core.FARM_THRESH
+                local minThreshold = Core.FARM_MIN_THRESH
+                local maxThreshold = Core.FARM_MAX_THRESH
 
-                if value and value > 0 and value < threshold then
+                if value and value > minThreshold and value < maxThreshold then
                     ue()
                     tool.Parent = player.Character
                     task.wait(0.2)
