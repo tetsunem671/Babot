@@ -98,23 +98,6 @@ local Controller = { Running = true }
 --==================================================
 -- STOP BUTTON
 --==================================================
-local gui = Instance.new("ScreenGui", player.PlayerGui)
-gui.Name = "AutoControl"
-gui.ResetOnSpawn = false
-
-local button = Instance.new("TextButton", gui)
-button.Size = UDim2.new(0,160,0,50)
-button.Position = UDim2.new(0,20,0.5,0)
-button.BackgroundColor3 = Color3.fromRGB(200,50,50)
-button.TextColor3 = Color3.new(1,1,1)
-button.Text = "STOP SCRIPT"
-
-button.Activated:Connect(function()
-    print("672")
-    Controller.Running = false
-    button.Text = "STOPPED"
-    button.BackgroundColor3 = Color3.fromRGB(80,80,80)
-end)
 
 local function SaveConfig()
     Config.AUTO_GIFT = AUTO_GIFT
