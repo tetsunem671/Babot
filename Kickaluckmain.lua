@@ -181,8 +181,8 @@ button.TextColor3 = Color3.new(1,1,1)
 button.Text = "STOP SCRIPT"
 button.Parent = gui
 
-button.MouseButton1Click:Connect(function()
-    Stop()
+button.Activated:Connect(function()
+    Core.Stop()
     button.Text = "STOPPED"
     button.BackgroundColor3 = Color3.fromRGB(70,70,70)
 end)
