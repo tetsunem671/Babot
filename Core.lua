@@ -44,6 +44,8 @@ Core.UPG_DELAY = 0.08
 Core.LOOP_DELAY = 0.08
 Core.GIFT_REQUEST_DELAY = 10
 
+Core.IgnoreLevelOnGift = false
+
 local MIN_SLOT, MAX_SLOT, MAX_LEVEL = 21, 21, 75
 
 local CONFIG_FILE = "auto_farm_config.json"
@@ -118,7 +120,7 @@ local function tweenTo(cf)
 end
 
 Core.TweenTo = tweenTo
-local function GetTrueCPS(tool)
+local function GetTrueCPS(tool, ignoreLevel)
     if not tool then return 0 end
 
     local name = tool.Name
@@ -145,7 +147,7 @@ local function GetTrueCPS(tool)
 
     -- level multiplier
     local levelMulti = EntitiesData.GetMultiplierPerLevel(level)
-    cps = cps * levelMulti
+    cps = cps * (ignoreLevel and 1 or levelMulti)
 
     local cps2 = ToNumberV2(cps)
 
@@ -235,7 +237,7 @@ task.spawn(function()
             if not Core.AUTO_FARM then break end
 
             if tool:IsA("Tool") and ((tool:GetAttribute("Level") or 0) < 75) and tool:GetAttribute("GUID") then
-                local value = GetTrueCPS(tool)
+                local value = GetTrueCPS(tool, true)
                 local minThreshold = Core.FARM_MIN_THRESH
                 local maxThreshold = Core.FARM_MAX_THRESH
 
@@ -268,7 +270,6 @@ end)
 -- GIFT SYSTEM
 --==================================================
 local function getTarget()
-    print(Core.TARGET_NAME)
     local name = tostring(Core.TARGET_NAME or ""):lower():gsub("%s+", "")
     local me = player
 
@@ -337,7 +338,7 @@ task.spawn(function()
             if not Core.AUTO_GIFT then break end
             if Core.tradedCount >= Core.TRADE_LIMIT then task.wait(0.5) continue end
             
-            local value = GetTrueCPS(tool)
+            local value = GetTrueCPS(tool, Core.IgnoreLevelOnGift)
             
             local min = Core.GIFT_MIN
             local max = Core.GIFT_MAX
