@@ -240,11 +240,12 @@ task.spawn(function()
                 local maxThreshold = Core.FARM_MAX_THRESH
 
                 if value and value > minThreshold and value < maxThreshold then
-                    if tool:GetAttribute("Favorite") then
-                        game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Packages"):WaitForChild("Network"):WaitForChild("rev_ToggleFav"):FireServer(child:GetAttribute("GUID"))
-                    end
                     ue()
                     tool.Parent = player.Character
+                        
+                    if tool:GetAttribute("Favorite") then
+                        game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Packages"):WaitForChild("Network"):WaitForChild("rev_ToggleFav"):FireServer(tool:GetAttribute("GUID"))
+                    end
                     task.wait(0.2)
     
     
@@ -343,11 +344,12 @@ task.spawn(function()
             
             if value >= min and value <= max then
                 if isGiftable(tool) then
-                    if tool:GetAttribute("Favorite") then
-                        game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Packages"):WaitForChild("Network"):WaitForChild("rev_ToggleFav"):FireServer(child:GetAttribute("GUID"))
-                    end
                     ue()
                     tool.Parent = player.Character
+                        
+                    if tool:GetAttribute("Favorite") then
+                        game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Packages"):WaitForChild("Network"):WaitForChild("rev_ToggleFav"):FireServer(tool:GetAttribute("GUID"))
+                    end
                     task.wait(0.123)
     
                     print("[Gift Target Selected]:", target and target.Name or "NONE")
