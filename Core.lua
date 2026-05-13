@@ -358,10 +358,10 @@ task.spawn(function()
     end
 end)
 
-if Network.OnClientEvent then
-    Network.OnClientEvent("SendGift"):Connect(function()
-        fire("SendGift", true)
-    end)
-end
+--if Network.OnClientEvent then
+ --   Network.OnClientEvent("SendGift"):Connect(function()
+   --     fire("SendGift", true)
+  --  end)
+--end
 
 return Core
