@@ -36,24 +36,24 @@ local function cfg(name, default)
 	return _G.Config[name]
 end
 
-Core.AUTO_FARM = cfg("AUTO_FARM", Core.AUTO_FARM)
-Core.AUTO_GIFT = cfg("AUTO_GIFT", Core.AUTO_GIFT)
+Core.AUTO_FARM = cfg("AUTO_FARM", false)
+Core.AUTO_GIFT = cfg("AUTO_GIFT", false)
 
-Core.TARGET_NAME = cfg("TARGET_NAME", Core.TARGET_NAME)
+Core.TARGET_NAME = cfg("TARGET_NAME", "")
 
-Core.FARM_MIN_THRESH = cfg("FARM_MIN_THRESH", Core.FARM_MIN_THRESH)
-Core.FARM_MAX_THRESH = cfg("FARM_MAX_THRESH", Core.FARM_MAX_THRESH)
+Core.FARM_MIN_THRESH = cfg("FARM_MIN_THRESH", 1)
+Core.FARM_MAX_THRESH = cfg("FARM_MAX_THRESH", 1e10)
 
-Core.GIFT_MIN = cfg("GIFT_MIN", Core.GIFT_MIN)
-Core.GIFT_MAX = cfg("GIFT_MAX", Core.GIFT_MAX)
+Core.GIFT_MIN = cfg("GIFT_MIN", 0)
+Core.GIFT_MAX = cfg("GIFT_MAX", 1e10)
 
-Core.TRADE_LIMIT = cfg("TRADE_LIMIT", Core.TRADE_LIMIT)
+Core.TRADE_LIMIT = cfg("TRADE_LIMIT", 3)
 
-Core.UPG_DELAY = cfg("UPG_DELAY", Core.UPG_DELAY)
-Core.LOOP_DELAY = cfg("LOOP_DELAY", Core.LOOP_DELAY)
-Core.GIFT_REQUEST_DELAY = cfg("GIFT_REQUEST_DELAY", Core.GIFT_REQUEST_DELAY)
+Core.UPG_DELAY = cfg("UPG_DELAY", 0.08)
+Core.LOOP_DELAY = cfg("LOOP_DELAY", 0.08)
+Core.GIFT_REQUEST_DELAY = cfg("GIFT_REQUEST_DELAY", 10)
 
-Core.IgnoreLevelOnGift = cfg("IgnoreLevelOnGift", Core.IgnoreLevelOnGift)
+Core.IgnoreLevelOnGift = cfg("IgnoreLevelOnGift", false)
 
 Core.tradedCount = 0
 Core.lastTraded = "None"
