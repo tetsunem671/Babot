@@ -83,6 +83,14 @@ GiftTab:CreateInput({
     end
 })
 
+GiftTab:CreateToggle({
+    Name = "Ignore Level",
+    CurrentValue = Core.IgnoreLevelOnGift,
+    Callback = function(v)
+        Core.IgnoreLevelOnGift = v
+    end
+})
+
 GiftTab:CreateInput({
     Name = "Gift Request Delay",
     PlaceholderText = tostring(Core.GIFT_REQUEST_DELAY),
@@ -191,7 +199,7 @@ end)
 -- STATS UI LOOP
 --==================================================
 task.spawn(function()
-    while task.wait(0.5) do
+    while task.wait(0.5) and Core.Running do
         if _G.Indicator then
             _G.Indicator:Set({
                 Title = "Trade Stats",
