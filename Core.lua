@@ -26,25 +26,32 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/tetsunem671/Babot/ref
 Core.Running = true
 Core.Stopped = false
 
-Core.AUTO_FARM = false
-Core.AUTO_GIFT = false
-Core.TARGET_NAME = ""
+-- Apply only if provided in _G.Config, otherwise keep Core defaults
+Core.AUTO_FARM = (_G.Config.AUTO_FARM ~= nil) and _G.Config.AUTO_FARM or Core.AUTO_FARM
+Core.AUTO_GIFT = (_G.Config.AUTO_GIFT ~= nil) and _G.Config.AUTO_GIFT or Core.AUTO_GIFT
 
-Core.FARM_MIN_THRESH = 1
-Core.FARM_MAX_THRESH = 1e10
-Core.GIFT_MIN = 0
-Core.GIFT_MAX = 1e10
+Core.TARGET_NAME = _G.Config.TARGET_NAME or Core.TARGET_NAME
 
-Core.TRADE_LIMIT = 3
+Core.FARM_MIN_THRESH = _G.Config.FARM_MIN_THRESH or Core.FARM_MIN_THRESH
+Core.FARM_MAX_THRESH = _G.Config.FARM_MAX_THRESH or Core.FARM_MAX_THRESH
+
+Core.GIFT_MIN = _G.Config.GIFT_MIN or Core.GIFT_MIN
+Core.GIFT_MAX = _G.Config.GIFT_MAX or Core.GIFT_MAX
+
+Core.TRADE_LIMIT = _G.Config.TRADE_LIMIT or Core.TRADE_LIMIT
+
+Core.UPG_DELAY = _G.Config.UPG_DELAY or Core.UPG_DELAY
+Core.LOOP_DELAY = _G.Config.LOOP_DELAY or Core.LOOP_DELAY
+Core.GIFT_REQUEST_DELAY = _G.Config.GIFT_REQUEST_DELAY or Core.GIFT_REQUEST_DELAY
+
+Core.IgnoreLevelOnGift =
+	(_G.Config.IgnoreLevelOnGift ~= nil)
+	and _G.Config.IgnoreLevelOnGift
+	or Core.IgnoreLevelOnGift
+
 Core.tradedCount = 0
 Core.lastTraded = "None"
 Core.startTime = 0
-
-Core.UPG_DELAY = 0.08
-Core.LOOP_DELAY = 0.08
-Core.GIFT_REQUEST_DELAY = 10
-
-Core.IgnoreLevelOnGift = false
 
 local MIN_SLOT, MAX_SLOT, MAX_LEVEL = 21, 21, 75
 
