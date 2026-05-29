@@ -99,20 +99,3 @@ workspace.DescendantAdded:Connect(function(v)
     if _G.__VFX_DISABLED then return end
     handleVFX(v)
 end)
-
---==================================================
--- FAILSAFE LOOP (ANTI-REENABLE / FAST EMIT)
---==================================================
-task.spawn(function()
-    while not _G.__VFX_DISABLED do
-        for _, v in ipairs(workspace:GetDescendants()) do
-            if v:IsA("ParticleEmitter") then
-                v.Enabled = false
-                v.Rate = 0
-            elseif v:IsA("Trail") or v:IsA("Beam") then
-                v.Enabled = false
-            end
-        end
-        task.wait(0.5) -- adjust (lower = stronger, higher = lighter)
-    end
-end)
